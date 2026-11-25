@@ -1,0 +1,140 @@
+/* Authentication Pages */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0f172a;
+  padding: var(--spacing-lg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-2xl) var(--spacing-xl);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.auth-logo {
+  width: 48px;
+  height: 48px;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--spacing-md);
+}
+
+.auth-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  margin-bottom: var(--spacing-xs);
+}
+
+.auth-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.auth-form {
+  margin-bottom: var(--spacing-lg);
+}
+
+.auth-footer {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--spacing-md);
+}
+
+.auth-link {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* Password Input with Toggle Button */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrapper .form-control {
+  padding-right: 48px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 8px;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.password-toggle-btn:hover {
+  color: var(--color-navy);
+  background-color: var(--color-bg-app);
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+}
+
+/* Success Banner */
+.success-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  background-color: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-md);
+  padding: 12px var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.success-icon {
+  font-size: 1.2rem;
+  margin-top: 2px;
+}
+
+.success-content {
+  flex: 1;
+}
+
+.success-text {
+  font-size: 0.875rem;
+  color: var(--color-success);
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+}
+
+.mt-2 {
+  margin-top: 8px;
+}
