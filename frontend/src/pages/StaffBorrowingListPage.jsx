@@ -6,6 +6,7 @@ import Pagination from '../components/common/Pagination.jsx';
 import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
 import EmptyState from '../components/common/EmptyState.jsx';
+import Icon from '../components/common/Icon.jsx';
 import { BORROWING_STATUS_LIST } from '../utils/constants.js';
 
 export function StaffBorrowingListPage() {
@@ -26,6 +27,7 @@ export function StaffBorrowingListPage() {
 
   const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [searchInput, setSearchInput] = useState(initialSearch);
+  const [sortBy, setSortBy] = useState('default');
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -103,11 +105,18 @@ export function StaffBorrowingListPage() {
     });
   };
 
+  const displayedBorrowings = [...borrowings].sort((a, b) => {
+    if (sortBy === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
+    if (sortBy === 'code_asc') return (a.borrowing_code || '').localeCompare(b.borrowing_code || '');
+    if (sortBy === 'borrower_asc') return (a.borrower_name || '').localeCompare(b.borrower_name || '', 'vi');
+    return 0;
+  });
+
   return (
     <div className="staff-borrowing-list-page">
       <div className="page-header-box">
         <div>
-          <h1 className="page-title">📋 Quản lý Phiếu mượn - Trả thiết bị</h1>
+          <h1 className="page-title">Quản lý Phiếu mượn - Trả thiết bị</h1>
           <p className="text-muted">
             Xem toàn bộ yêu cầu trong hệ thống, thực hiện duyệt, bàn giao và tiếp nhận hoàn trả.
           </p>
@@ -117,11 +126,14 @@ export function StaffBorrowingListPage() {
       {/* Filter and Search Bar */}
       <div className="filter-bar card p-3 mb-4">
         <form onSubmit={handleSearchSubmit} className="filter-form" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ flex: '1 1 240px' }}>
+          <div className="search-input-group" style={{ flex: '1 1 240px' }}>
+            <span className="search-icon">
+              <Icon name="search" size={16} />
+            </span>
             <input
               type="text"
-              className="form-input"
-              placeholder="🔍 Tìm theo mã phiếu, ghi chú..."
+              className="form-control search-input"
+              placeholder="Tìm theo mã phiếu, ghi chú..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
@@ -129,7 +141,7 @@ export function StaffBorrowingListPage() {
 
           <div style={{ minWidth: '180px' }}>
             <select
-              className="form-select"
+              className="form-control select-control"
               value={statusFilter}
               onChange={handleStatusChange}
             >
@@ -142,8 +154,22 @@ export function StaffBorrowingListPage() {
             </select>
           </div>
 
+          <div style={{ minWidth: '160px' }}>
+            <select
+              className="form-control select-control"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              title="Sắp xếp kết quả"
+            >
+              <option value="default">Sắp xếp: Mới nhất</option>
+              <option value="date_asc">Ngày tạo (Cũ nhất)</option>
+              <option value="code_asc">Mã phiếu (A &rarr; Z)</option>
+              <option value="borrower_asc">Người mượn (A &rarr; Z)</option>
+            </select>
+          </div>
+
           <button type="submit" className="btn btn-primary btn-sm">
-            Tìm kiếm
+            <Icon name="search" size={14} /> Tìm kiếm
           </button>
 
           {(statusFilter || searchInput) && (
@@ -165,15 +191,20 @@ export function StaffBorrowingListPage() {
         <Loading text="Đang tải danh sách phiếu mượn..." />
       ) : borrowings.length === 0 ? (
         <EmptyState
-          icon="🔍"
+          icon="search"
           title="Không tìm thấy phiếu mượn phù hợp"
           description={
             statusFilter || searchInput
               ? 'Không có phiếu mượn nào khớp với điều kiện lọc hiện tại.'
               : 'Hệ thống chưa ghi nhận phiếu mượn nào.'
           }
-          actionText={statusFilter || searchInput ? 'Xóa bộ lọc' : undefined}
-          onAction={statusFilter || searchInput ? handleResetFilters : undefined}
+          action={
+            (statusFilter || searchInput) ? (
+              <button type="button" className="btn btn-outline" onClick={handleResetFilters}>
+                Xóa bộ lọc
+              </button>
+            ) : null
+          }
         />
       ) : (
         <div className="card">
@@ -192,7 +223,7 @@ export function StaffBorrowingListPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {borrowings.map((b) => (
+                  {displayedBorrowings.map((b) => (
                     <tr key={b.id}>
                       <td>
                         <Link
@@ -218,7 +249,7 @@ export function StaffBorrowingListPage() {
                         {b.purpose}
                       </td>
                       <td style={{ textAlign: 'center' }}>
-                        <span className="badge badge-light" style={{ fontWeight: 600 }}>
+                        <span className="badge badge-borrower font-bold">
                           {b.total_items || 1}
                         </span>
                       </td>
@@ -242,10 +273,9 @@ export function StaffBorrowingListPage() {
           </div>
           <div className="card-footer p-3">
             <Pagination
-              currentPage={pagination.page}
+              page={pagination.page}
               totalPages={pagination.totalPages}
-              totalItems={pagination.total}
-              limit={pagination.limit}
+              total={pagination.total}
               onPageChange={handlePageChange}
             />
           </div>

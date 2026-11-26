@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth.js';
 import { ROLES } from '../../utils/constants.js';
+import Icon from '../common/Icon.jsx';
 
 export function Sidebar() {
   const { user } = useAuth();
@@ -25,12 +26,12 @@ export function Sidebar() {
             end
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           >
-            <span className="nav-icon">🏠</span>
+            <span className="nav-icon"><Icon name="home" size={18} /></span>
             <span className="nav-label">Trang chủ</span>
           </NavLink>
         </div>
 
-        {/* Phân hệ dành riêng cho Borrower (FE3) */}
+        {/* Phân hệ dành riêng cho Borrower */}
         {role === ROLES.BORROWER && (
           <div className="nav-group">
             <span className="nav-group-title">Phân hệ Người mượn</span>
@@ -39,21 +40,21 @@ export function Sidebar() {
               end
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              <span className="nav-icon">📊</span>
+              <span className="nav-icon"><Icon name="dashboard" size={18} /></span>
               <span className="nav-label">Bảng điều khiển</span>
             </NavLink>
             <NavLink
               to="/borrower/equipments"
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              <span className="nav-icon">📦</span>
+              <span className="nav-icon"><Icon name="equipment" size={18} /></span>
               <span className="nav-label">Danh mục thiết bị</span>
             </NavLink>
             <NavLink
               to="/borrower/borrowings/create"
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              <span className="nav-icon">➕</span>
+              <span className="nav-icon"><Icon name="plus" size={18} /></span>
               <span className="nav-label">Tạo yêu cầu mượn</span>
             </NavLink>
             <NavLink
@@ -61,7 +62,7 @@ export function Sidebar() {
               end
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              <span className="nav-icon">📋</span>
+              <span className="nav-icon"><Icon name="clipboard" size={18} /></span>
               <span className="nav-label">Lịch sử phiếu mượn</span>
             </NavLink>
           </div>
@@ -76,20 +77,20 @@ export function Sidebar() {
               end
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              <span className="nav-icon">📊</span>
+              <span className="nav-icon"><Icon name="dashboard" size={18} /></span>
               <span className="nav-label">Bảng điều khiển Staff</span>
             </NavLink>
             <NavLink
               to="/staff/borrowings"
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              <span className="nav-icon">📋</span>
+              <span className="nav-icon"><Icon name="clipboard" size={18} /></span>
               <span className="nav-label">Quản lý mượn trả</span>
             </NavLink>
           </div>
         )}
 
-        {/* Phân hệ dành riêng cho Admin (FE5) */}
+        {/* Phân hệ dành riêng cho Admin */}
         {role === ROLES.ADMIN && (
           <div className="nav-group">
             <span className="nav-group-title">Quản trị hệ thống</span>
@@ -98,21 +99,21 @@ export function Sidebar() {
               end
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              <span className="nav-icon">📊</span>
+              <span className="nav-icon"><Icon name="shield" size={18} /></span>
               <span className="nav-label">Bảng điều khiển Admin</span>
             </NavLink>
             <NavLink
               to="/admin/equipments"
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              <span className="nav-icon">📦</span>
+              <span className="nav-icon"><Icon name="equipment" size={18} /></span>
               <span className="nav-label">Quản lý thiết bị</span>
             </NavLink>
             <NavLink
               to="/admin/users"
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              <span className="nav-icon">👥</span>
+              <span className="nav-icon"><Icon name="users" size={18} /></span>
               <span className="nav-label">Quản lý người dùng</span>
             </NavLink>
           </div>
@@ -120,7 +121,7 @@ export function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <span className="version-label">Rikkei Lab v1.0.0 (FE5)</span>
+        <span className="version-label">Rikkei Lab v1.0.0</span>
         <span className="status-indicator">
           <span className="status-dot"></span> Đã kết nối Backend
         </span>

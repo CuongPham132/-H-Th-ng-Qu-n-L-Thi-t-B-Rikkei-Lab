@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Icon from '../common/Icon.jsx';
 
 /**
  * HandoverDialog Component
@@ -32,7 +33,7 @@ export function HandoverDialog({
       <div className="modal-card modal-card-md">
         <div className="modal-header">
           <h3 id="handover-dialog-title" className="modal-title">
-            🤝 Bàn giao thiết bị cho người mượn
+            Bàn giao thiết bị cho người mượn
           </h3>
           <button
             type="button"
@@ -41,7 +42,7 @@ export function HandoverDialog({
             disabled={isLoading}
             aria-label="Đóng"
           >
-            &times;
+            <Icon name="close" size={16} />
           </button>
         </div>
 
@@ -53,7 +54,9 @@ export function HandoverDialog({
             </p>
 
             <div className="audit-card mb-3">
-              <div className="audit-card-title">📦 Danh sách thiết bị bàn giao</div>
+              <div className="audit-card-title">
+                <Icon name="box" size={14} /> Danh sách thiết bị bàn giao
+              </div>
               <ul style={{ paddingLeft: '20px', margin: 0 }}>
                 {borrowing.items?.map((item) => (
                   <li key={item.id} style={{ fontSize: '0.9rem', marginBottom: '4px' }}>
@@ -71,7 +74,7 @@ export function HandoverDialog({
               <input
                 id="borrowingDays"
                 type="number"
-                className="form-input"
+                className="form-control"
                 min={1}
                 max={14}
                 value={borrowingDays}
@@ -81,7 +84,7 @@ export function HandoverDialog({
                 }}
                 disabled={isLoading}
               />
-              <span className="field-hint">Tối đa 14 ngày theo quy định phòng Lab.</span>
+              <span className="form-hint">Tối đa 14 ngày theo quy định phòng Lab.</span>
               {validationError && (
                 <span className="text-danger" style={{ fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>
                   {validationError}
@@ -89,8 +92,9 @@ export function HandoverDialog({
               )}
             </div>
 
-            <div className="notice-banner" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe', color: '#1e40af' }}>
-              ℹ️ Thao tác này sẽ chuyển trạng thái đơn sang <strong>ĐANG MƯỢN (BORROWED)</strong>, cập nhật ngày bàn giao, hạn trả và dịch chuyển tồn kho từ Giữ chỗ sang Đang mượn.
+            <div className="notice-banner" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Icon name="info" size={16} color="#2563eb" />
+              <span>Thao tác này sẽ chuyển trạng thái đơn sang <strong>Đang mượn</strong>, cập nhật ngày bàn giao, hạn trả và dịch chuyển tồn kho từ Giữ chỗ sang Đang mượn.</span>
             </div>
           </div>
 

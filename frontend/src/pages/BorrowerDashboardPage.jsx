@@ -2,15 +2,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth.js';
 import borrowingService from '../services/borrowing.service.js';
-import equipmentService from '../services/equipment.service.js';
 import BorrowingTable from '../components/borrowing/BorrowingTable.jsx';
 import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
 import EmptyState from '../components/common/EmptyState.jsx';
 import ConfirmDialog from '../components/common/ConfirmDialog.jsx';
+import Icon from '../components/common/Icon.jsx';
+import Breadcrumb from '../components/common/Breadcrumb.jsx';
+import { useToast } from '../contexts/ToastContext.jsx';
 
 export function BorrowerDashboardPage() {
   const { user } = useAuth();
+  const toast = useToast();
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -20,7 +23,7 @@ export function BorrowerDashboardPage() {
   const [recentBorrowings, setRecentBorrowings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
-  
+
   // Cancel dialog state
   const [cancelTarget, setCancelTarget] = useState(null);
   const [cancelReason, setCancelReason] = useState('');
@@ -32,7 +35,7 @@ export function BorrowerDashboardPage() {
       setIsLoading(true);
       setErrorMsg('');
 
-      // Fetch user's borrowings (Backend automatically filters by borrower_id = user.id)
+      // Fetch user's borrowings
       const res = await borrowingService.getBorrowings({ limit: 50 });
       const list = res.borrowings || [];
 
@@ -79,7 +82,9 @@ export function BorrowerDashboardPage() {
     try {
       setIsCancelling(true);
       await borrowingService.cancelBorrowing(cancelTarget.id, cancelReason);
-      setActionSuccess(`Hủy phiếu mượn ${cancelTarget.borrowing_code} thành công.`);
+      const msg = `Hủy phiếu mượn ${cancelTarget.borrowing_code} thành công.`;
+      setActionSuccess(msg);
+      toast.success(msg);
       setCancelTarget(null);
       await loadDashboardData();
     } catch (err) {
@@ -95,6 +100,7 @@ export function BorrowerDashboardPage() {
 
   return (
     <div className="borrower-dashboard">
+      <Breadcrumb items={[{ label: 'Bảng điều khiển người mượn' }]} />
       <div className="dashboard-header-banner">
         <div>
           <h2 className="dashboard-page-title">Bảng Điều Khiển Người Mượn</h2>
@@ -104,10 +110,10 @@ export function BorrowerDashboardPage() {
         </div>
         <div className="dashboard-header-actions">
           <Link to="/borrower/equipments" className="btn btn-outline">
-            🔍 Xem Thiết Bị
+            <Icon name="search" size={15} /> Tra cứu thiết bị
           </Link>
           <Link to="/borrower/borrowings/create" className="btn btn-primary">
-            + Tạo Yêu Cầu Mới
+            <Icon name="plus" size={15} /> Tạo yêu cầu mượn
           </Link>
         </div>
       </div>
@@ -116,42 +122,52 @@ export function BorrowerDashboardPage() {
 
       {actionSuccess && (
         <div className="success-banner" role="status">
-          <span className="success-icon">✅</span>
+          <span className="success-icon">
+            <Icon name="check-circle" size={18} color="var(--color-success)" />
+          </span>
           <p className="success-text">{actionSuccess}</p>
         </div>
       )}
 
-      {/* KPI Stats Cards */}
-      <div className="kpi-grid">
-        <div className="kpi-card">
-          <div className="kpi-icon kpi-icon-blue">📋</div>
-          <div className="kpi-content">
-            <span className="kpi-label">Tổng số phiếu mượn</span>
-            <span className="kpi-value">{stats.total}</span>
+      {/* KPI Stats Cards (Compact layout, no wasted whitespace) */}
+      <div className="kpi-compact-grid">
+        <div className="kpi-compact-box">
+          <div className="kpi-compact-icon" style={{ backgroundColor: '#eff6ff', color: '#2563eb' }}>
+            <Icon name="clipboard" size={20} />
+          </div>
+          <div className="kpi-compact-data">
+            <span className="kpi-compact-title">Tổng số phiếu</span>
+            <span className="kpi-compact-number">{stats.total}</span>
           </div>
         </div>
 
-        <div className="kpi-card">
-          <div className="kpi-icon kpi-icon-amber">⏳</div>
-          <div className="kpi-content">
-            <span className="kpi-label">Đang chờ duyệt</span>
-            <span className="kpi-value text-amber">{stats.pending}</span>
+        <div className="kpi-compact-box">
+          <div className="kpi-compact-icon" style={{ backgroundColor: '#fffbeb', color: '#d97706' }}>
+            <Icon name="clock" size={20} />
+          </div>
+          <div className="kpi-compact-data">
+            <span className="kpi-compact-title">Đang chờ duyệt</span>
+            <span className="kpi-compact-number text-amber">{stats.pending}</span>
           </div>
         </div>
 
-        <div className="kpi-card">
-          <div className="kpi-icon kpi-icon-green">✅</div>
-          <div className="kpi-content">
-            <span className="kpi-label">Đã được duyệt</span>
-            <span className="kpi-value text-green">{stats.approved}</span>
+        <div className="kpi-compact-box">
+          <div className="kpi-compact-icon" style={{ backgroundColor: '#f0fdf4', color: '#16a34a' }}>
+            <Icon name="check-circle" size={20} />
+          </div>
+          <div className="kpi-compact-data">
+            <span className="kpi-compact-title">Đã được duyệt</span>
+            <span className="kpi-compact-number text-green">{stats.approved}</span>
           </div>
         </div>
 
-        <div className="kpi-card">
-          <div className="kpi-icon kpi-icon-purple">📦</div>
-          <div className="kpi-content">
-            <span className="kpi-label">Đang mượn thực tế</span>
-            <span className="kpi-value text-purple">{stats.borrowed}</span>
+        <div className="kpi-compact-box">
+          <div className="kpi-compact-icon" style={{ backgroundColor: '#faf5ff', color: '#7c3aed' }}>
+            <Icon name="box" size={20} />
+          </div>
+          <div className="kpi-compact-data">
+            <span className="kpi-compact-title">Đang mượn thực tế</span>
+            <span className="kpi-compact-number text-purple">{stats.borrowed}</span>
           </div>
         </div>
       </div>
@@ -159,7 +175,7 @@ export function BorrowerDashboardPage() {
       {/* Recent Borrowings Section */}
       <div className="card mt-4">
         <div className="card-header flex-between">
-          <h3 className="card-title">📝 Phiếu Mượn Gần Đây</h3>
+          <h3 className="card-title">Phiếu mượn gần đây</h3>
           <Link to="/borrower/borrowings" className="btn btn-outline-sm">
             Xem tất cả lịch sử &raquo;
           </Link>
@@ -173,12 +189,12 @@ export function BorrowerDashboardPage() {
           ) : (
             <div className="p-4">
               <EmptyState
-                icon="📝"
+                icon="clipboard"
                 title="Chưa có phiếu mượn nào"
                 description="Bạn chưa tạo phiếu mượn thiết bị nào trong hệ thống."
                 action={
                   <Link to="/borrower/borrowings/create" className="btn btn-primary">
-                    Tạo yêu cầu mượn ngay
+                    <Icon name="plus" size={15} /> Tạo yêu cầu mượn ngay
                   </Link>
                 }
               />

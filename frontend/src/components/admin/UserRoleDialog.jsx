@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ROLE_LIST } from '../../utils/constants.js';
+import Icon from '../common/Icon.jsx';
 
 /**
  * UserRoleDialog Component
@@ -35,7 +36,7 @@ export function UserRoleDialog({
       <div className="modal-card modal-card-md">
         <div className="modal-header">
           <h3 id="user-role-title" className="modal-title">
-            🛡️ Thay đổi vai trò người dùng
+            Thay đổi vai trò người dùng
           </h3>
           <button
             type="button"
@@ -44,7 +45,7 @@ export function UserRoleDialog({
             disabled={isLoading}
             aria-label="Đóng"
           >
-            &times;
+            <Icon name="close" size={16} />
           </button>
         </div>
 
@@ -55,14 +56,16 @@ export function UserRoleDialog({
             </p>
 
             {isSelf && (
-              <div className="notice-banner mb-3" style={{ backgroundColor: '#fef2f2', borderColor: '#fca5a5', color: '#991b1b' }}>
-                ⚠️ <strong>Cảnh báo:</strong> Bạn đang thao tác trên tài khoản của chính mình. Hệ thống Backend nghiêm cấm quản trị viên tự thay đổi vai trò của mình (SELF_ACTION_FORBIDDEN).
+              <div className="notice-banner mb-3" style={{ backgroundColor: '#fef2f2', borderColor: '#fca5a5', color: '#991b1b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Icon name="alert" size={16} color="#dc2626" />
+                <span><strong>Cảnh báo:</strong> Bạn đang thao tác trên tài khoản của chính mình. Hệ thống Backend nghiêm cấm quản trị viên tự thay đổi vai trò của mình (SELF_ACTION_FORBIDDEN).</span>
               </div>
             )}
 
             {user.role === 'ADMIN' && (
-              <div className="notice-banner mb-3" style={{ backgroundColor: '#fffbeb', borderColor: '#fde68a', color: '#92400e' }}>
-                ⚠️ <strong>Lưu ý:</strong> Nếu tài khoản này là Quản trị viên (ADMIN) duy nhất đang hoạt động, hệ thống sẽ từ chối giáng cấp để tránh mất quyền quản trị hệ thống.
+              <div className="notice-banner mb-3" style={{ backgroundColor: '#fffbeb', borderColor: '#fde68a', color: '#92400e', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Icon name="alert" size={16} color="#d97706" />
+                <span><strong>Lưu ý:</strong> Nếu tài khoản này là Quản trị viên duy nhất đang hoạt động, hệ thống sẽ từ chối giáng cấp để tránh mất quyền quản trị hệ thống.</span>
               </div>
             )}
 
@@ -72,7 +75,7 @@ export function UserRoleDialog({
               </label>
               <select
                 id="userRoleSelect"
-                className="form-select"
+                className="form-control select-control"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 disabled={isLoading || isSelf}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Icon from '../common/Icon.jsx';
 
 /**
  * RejectDialog Component
@@ -36,7 +37,7 @@ export function RejectDialog({
       <div className="modal-card modal-card-md">
         <div className="modal-header">
           <h3 id="reject-dialog-title" className="modal-title">
-            ❌ Từ chối yêu cầu mượn thiết bị
+            Từ chối yêu cầu mượn thiết bị
           </h3>
           <button
             type="button"
@@ -45,7 +46,7 @@ export function RejectDialog({
             disabled={isLoading}
             aria-label="Đóng"
           >
-            &times;
+            <Icon name="close" size={16} />
           </button>
         </div>
 
@@ -57,8 +58,9 @@ export function RejectDialog({
             </p>
 
             {borrowing.status === 'APPROVED' && (
-              <div className="notice-banner mb-3" style={{ backgroundColor: '#fffbeb', borderColor: '#fde68a', color: '#92400e' }}>
-                ⚠️ Phiếu mượn này đã được duyệt trước đó. Khi từ chối, hệ thống sẽ tự động hoàn trả số lượng đã giữ kho (reserved stock) về kho khả dụng.
+              <div className="notice-banner mb-3" style={{ backgroundColor: '#fffbeb', borderColor: '#fde68a', color: '#92400e', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Icon name="alert" size={16} color="#d97706" />
+                <span>Phiếu mượn này đã được duyệt trước đó. Khi từ chối, hệ thống sẽ tự động hoàn trả số lượng đã giữ kho về kho khả dụng.</span>
               </div>
             )}
 
@@ -68,7 +70,7 @@ export function RejectDialog({
               </label>
               <textarea
                 id="rejectionReason"
-                className={`form-textarea ${validationError ? 'border-danger' : ''}`}
+                className={`form-control ${validationError ? 'border-danger' : ''}`}
                 rows={4}
                 placeholder="Nhập lý do từ chối cụ thể (từ 2 đến 255 ký tự)..."
                 value={reason}

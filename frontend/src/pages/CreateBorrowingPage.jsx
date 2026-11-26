@@ -4,10 +4,15 @@ import equipmentService from '../services/equipment.service.js';
 import borrowingService from '../services/borrowing.service.js';
 import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
+import StatusBadge from '../components/common/StatusBadge.jsx';
+import Icon from '../components/common/Icon.jsx';
+import Breadcrumb from '../components/common/Breadcrumb.jsx';
+import { useToast } from '../contexts/ToastContext.jsx';
 
 export function CreateBorrowingPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const toast = useToast();
 
   // Parse pre-selected equipment from query params if any
   const queryParams = new URLSearchParams(location.search);
@@ -18,6 +23,7 @@ export function CreateBorrowingPage() {
 
   // Form state
   const [purpose, setPurpose] = useState('');
+  const [purposeError, setPurposeError] = useState('');
   const [borrowingDays, setBorrowingDays] = useState(7);
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState([
@@ -37,7 +43,6 @@ export function CreateBorrowingPage() {
     async function loadEquipments() {
       try {
         setIsLoadingEquipments(true);
-        // Borrower automatically only receives active & AVAILABLE equipments
         const res = await equipmentService.getEquipments({ limit: 100 });
         setAvailableEquipments(res.equipments || []);
       } catch (err) {
@@ -57,7 +62,6 @@ export function CreateBorrowingPage() {
       const updated = [...prevItems];
       updated[index] = { ...updated[index], [field]: value };
 
-      // If equipment changed, clamp quantity to available_quantity
       if (field === 'equipment_id') {
         const selectedEq = availableEquipments.find((e) => e.id === Number(value));
         if (selectedEq) {
@@ -76,7 +80,6 @@ export function CreateBorrowingPage() {
 
   // Add new item row
   const handleAddItemRow = () => {
-    // Find first equipment not yet chosen
     const chosenIds = new Set(items.map((i) => Number(i.equipment_id)).filter(Boolean));
     const firstFree = availableEquipments.find((e) => !chosenIds.has(e.id));
 
@@ -101,10 +104,12 @@ export function CreateBorrowingPage() {
     if (isSubmitting) return;
 
     setFormError('');
+    setPurposeError('');
 
     const trimmedPurpose = purpose.trim();
     if (!trimmedPurpose || trimmedPurpose.length < 5) {
-      setFormError('Mục đích mượn thiết bị là bắt buộc và phải có ít nhất 5 ký tự.');
+      setPurposeError('Mục đích mượn thiết bị là bắt buộc và phải có ít nhất 5 ký tự.');
+      setFormError('Vui lòng kiểm tra lại thông tin mục đích mượn.');
       return;
     }
 
@@ -165,6 +170,7 @@ export function CreateBorrowingPage() {
       };
 
       const result = await borrowingService.createBorrowing(payload);
+      toast.success(`Tạo phiếu mượn thành công! Mã phiếu: ${result.borrowing_code}`);
       setCreatedResult(result);
     } catch (err) {
       console.error('Error creating borrowing request:', err);
@@ -183,11 +189,13 @@ export function CreateBorrowingPage() {
     return (
       <div className="create-borrowing-success">
         <div className="card success-card text-center">
-          <div className="success-icon-large">🎉</div>
-          <h2 className="success-heading">Tạo Yêu Cầu Mượn Thiết Bị Thành Công!</h2>
+          <div className="success-icon-large" style={{ color: 'var(--color-success)' }}>
+            <Icon name="check-circle" size={54} color="var(--color-success)" />
+          </div>
+          <h2 className="success-heading">Tạo yêu cầu mượn thiết bị thành công!</h2>
           <p className="success-desc">
             Yêu cầu mượn của bạn đã được tiếp nhận và đang ở trạng thái{' '}
-            <span className="badge-status-pending">Chờ duyệt (PENDING)</span>.
+            <StatusBadge status="PENDING" />
           </p>
 
           <div className="success-code-box">
@@ -204,13 +212,13 @@ export function CreateBorrowingPage() {
               to={`/borrower/borrowings/${createdResult.id}`}
               className="btn btn-primary"
             >
-              Xem Chi Tiết Phiếu Mượn
+              Xem chi tiết phiếu mượn
             </Link>
             <Link
               to="/borrower/borrowings"
               className="btn btn-outline"
             >
-              Về Lịch Sử Phiếu Mượn
+              Về lịch sử phiếu mượn
             </Link>
             <button
               type="button"
@@ -222,7 +230,7 @@ export function CreateBorrowingPage() {
                 setItems([{ equipment_id: '', quantity: 1, item_notes: '' }]);
               }}
             >
-              Tạo Yêu Cầu Khác
+              Tạo yêu cầu khác
             </button>
           </div>
         </div>
@@ -232,6 +240,12 @@ export function CreateBorrowingPage() {
 
   return (
     <div className="create-borrowing-page">
+      <Breadcrumb
+        items={[
+          { label: 'Thiết bị & Mượn trả', to: '/borrower/borrowings' },
+          { label: 'Tạo phiếu mượn' },
+        ]}
+      />
       <div className="page-header-box">
         <div>
           <h2 className="page-title">Tạo Yêu Cầu Mượn Thiết Bị</h2>
@@ -250,21 +264,25 @@ export function CreateBorrowingPage() {
         {/* Section 1: General Info */}
         <div className="form-section">
           <h3 className="section-heading">1. Thông tin chung về đợt mượn</h3>
-          
+
           <div className="form-group">
             <label htmlFor="create-purpose" className="form-label">
               Mục đích mượn thiết bị <span className="required">*</span>
             </label>
             <textarea
               id="create-purpose"
-              className="form-control"
+              className={`form-control ${purposeError ? 'input-has-error' : ''}`}
               rows="3"
               placeholder="Nêu rõ mục đích nghiên cứu, học tập, môn học hoặc dự án lab (tối thiểu 5 ký tự)..."
               value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
+              onChange={(e) => {
+                setPurpose(e.target.value);
+                if (purposeError) setPurposeError('');
+              }}
               disabled={isSubmitting}
               required
             ></textarea>
+            {purposeError && <span className="field-error-text">{purposeError}</span>}
           </div>
 
           <div className="form-row">
@@ -313,7 +331,7 @@ export function CreateBorrowingPage() {
               onClick={handleAddItemRow}
               disabled={isSubmitting || items.length >= availableEquipments.length}
             >
-              + Thêm thiết bị khác
+              <Icon name="plus" size={14} /> Thêm thiết bị khác
             </button>
           </div>
 
@@ -400,7 +418,7 @@ export function CreateBorrowingPage() {
                       disabled={isSubmitting}
                       title="Xóa dòng này"
                     >
-                      &times;
+                      <Icon name="close" size={16} />
                     </button>
                   )}
                 </div>

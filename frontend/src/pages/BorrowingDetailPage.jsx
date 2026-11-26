@@ -5,9 +5,13 @@ import StatusBadge from '../components/common/StatusBadge.jsx';
 import ConfirmDialog from '../components/common/ConfirmDialog.jsx';
 import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
+import Icon from '../components/common/Icon.jsx';
+import Breadcrumb from '../components/common/Breadcrumb.jsx';
+import { useToast } from '../contexts/ToastContext.jsx';
 
 export function BorrowingDetailPage() {
   const { id } = useParams();
+  const toast = useToast();
 
   const [borrowing, setBorrowing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +47,7 @@ export function BorrowingDetailPage() {
     try {
       setIsCancelling(true);
       await borrowingService.cancelBorrowing(borrowing.id, cancelReason);
-      setActionSuccess('Hủy phiếu mượn thành công. Đơn đã chuyển sang trạng thái ĐÃ HỦY (CANCELLED).');
+      setActionSuccess('Hủy phiếu mượn thành công. Đơn đã chuyển sang trạng thái ĐÃ HỦY.');
       setShowCancelDialog(false);
       await fetchBorrowingDetail();
     } catch (err) {
@@ -84,6 +88,12 @@ export function BorrowingDetailPage() {
 
   return (
     <div className="borrowing-detail-page">
+      <Breadcrumb
+        items={[
+          { label: 'Lịch sử phiếu mượn', to: '/borrower/borrowings' },
+          { label: borrowing.borrowing_code || `Phiếu #${borrowing.id}` },
+        ]}
+      />
       <div className="detail-navigation flex-between">
         <Link to="/borrower/borrowings" className="btn btn-outline-sm">
           &laquo; Về lịch sử phiếu mượn
@@ -103,7 +113,9 @@ export function BorrowingDetailPage() {
 
       {actionSuccess && (
         <div className="success-banner" role="status">
-          <span className="success-icon">✅</span>
+          <span className="success-icon">
+            <Icon name="check-circle" size={18} color="var(--color-success)" />
+          </span>
           <p className="success-text">{actionSuccess}</p>
         </div>
       )}
@@ -162,7 +174,7 @@ export function BorrowingDetailPage() {
       {/* Purpose & Notes */}
       <div className="card mt-4">
         <div className="card-header">
-          <h3 className="card-title">📌 Mục Đích & Ghi Chú</h3>
+          <h3 className="card-title">Mục đích & Ghi chú</h3>
         </div>
         <div className="card-body">
           <div className="info-row">
@@ -179,7 +191,7 @@ export function BorrowingDetailPage() {
       {/* Borrowed Items Table */}
       <div className="card mt-4">
         <div className="card-header">
-          <h3 className="card-title">📦 Danh Sách Thiết Bị Trong Phiếu ({borrowing.items?.length || 0} món)</h3>
+          <h3 className="card-title">Danh sách thiết bị trong phiếu ({borrowing.items?.length || 0} món)</h3>
         </div>
         <div className="card-body p-0">
           <div className="table-responsive">

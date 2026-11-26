@@ -8,6 +8,7 @@ import StatusBadge from '../components/common/StatusBadge.jsx';
 import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
 import EmptyState from '../components/common/EmptyState.jsx';
+import Icon from '../components/common/Icon.jsx';
 
 export function AdminDashboardPage() {
   const { user } = useAuth();
@@ -100,7 +101,7 @@ export function AdminDashboardPage() {
   };
 
   if (isLoading) {
-    return <Loading text="Đang tải dữ liệu Bảng điều khiển Quản trị viên (ADMIN)..." />;
+    return <Loading text="Đang tải dữ liệu Bảng điều khiển Quản trị viên..." />;
   }
 
   return (
@@ -108,17 +109,17 @@ export function AdminDashboardPage() {
       {/* Header */}
       <div className="dashboard-header-banner">
         <div>
-          <h1 className="dashboard-page-title">🛡️ Bảng điều khiển Quản trị Hệ thống</h1>
+          <h1 className="dashboard-page-title">Bảng điều khiển Quản trị Hệ thống</h1>
           <p className="text-muted">
             Xin chào Quản trị viên, <strong>{user?.full_name}</strong>! Giám sát toàn diện người dùng, kho thiết bị và quy trình mượn trả.
           </p>
         </div>
         <div className="dashboard-header-actions">
           <Link to="/admin/equipments/new" className="btn btn-primary btn-sm">
-            ➕ Thêm thiết bị mới
+            <Icon name="plus" size={14} /> Thêm thiết bị mới
           </Link>
           <Link to="/admin/users" className="btn btn-outline btn-sm">
-            👥 Quản lý người dùng
+            <Icon name="users" size={14} /> Quản lý người dùng
           </Link>
         </div>
       </div>
@@ -128,18 +129,22 @@ export function AdminDashboardPage() {
       {/* KPI Cards Grid */}
       <div className="kpi-grid">
         <Link to="/admin/users" className="kpi-card" style={{ textDecoration: 'none' }}>
-          <div className="kpi-icon kpi-icon-blue">👥</div>
+          <div className="kpi-icon kpi-icon-blue">
+            <Icon name="users" size={22} color="var(--color-primary)" />
+          </div>
           <div className="kpi-content">
             <span className="kpi-label">Tổng người dùng</span>
             <span className="kpi-value">{stats.totalUsers}</span>
             <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-              {stats.adminUsers} Admin • {stats.staffUsers} Staff • {stats.borrowerUsers} Borrower
+              {stats.adminUsers} Quản trị viên • {stats.staffUsers} Nhân viên • {stats.borrowerUsers} Người mượn
             </span>
           </div>
         </Link>
 
         <Link to="/admin/equipments" className="kpi-card" style={{ textDecoration: 'none' }}>
-          <div className="kpi-icon kpi-icon-purple">📦</div>
+          <div className="kpi-icon kpi-icon-purple">
+            <Icon name="box" size={22} color="#7c3aed" />
+          </div>
           <div className="kpi-content">
             <span className="kpi-label">Loại thiết bị trong Lab</span>
             <span className="kpi-value text-purple">{stats.totalEquipments}</span>
@@ -150,7 +155,9 @@ export function AdminDashboardPage() {
         </Link>
 
         <Link to="/staff/borrowings" className="kpi-card" style={{ textDecoration: 'none' }}>
-          <div className="kpi-icon kpi-icon-amber">📋</div>
+          <div className="kpi-icon kpi-icon-amber">
+            <Icon name="clipboard" size={22} color="var(--color-warning)" />
+          </div>
           <div className="kpi-content">
             <span className="kpi-label">Tổng phiếu mượn</span>
             <span className="kpi-value text-amber">{stats.totalBorrowings}</span>
@@ -164,7 +171,9 @@ export function AdminDashboardPage() {
       {/* Status Breakdown Grid */}
       <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
         <Link to="/staff/borrowings?status=PENDING" className="kpi-card" style={{ textDecoration: 'none', padding: '12px 16px' }}>
-          <div className="kpi-icon kpi-icon-amber" style={{ width: '38px', height: '38px', fontSize: '1.1rem' }}>⏳</div>
+          <div className="kpi-icon kpi-icon-amber" style={{ width: '38px', height: '38px' }}>
+            <Icon name="clock" size={18} color="var(--color-warning)" />
+          </div>
           <div className="kpi-content">
             <span className="kpi-label">Chờ duyệt</span>
             <span className="kpi-value text-amber" style={{ fontSize: '1.25rem' }}>{stats.pendingBorrowings}</span>
@@ -172,7 +181,9 @@ export function AdminDashboardPage() {
         </Link>
 
         <Link to="/staff/borrowings?status=APPROVED" className="kpi-card" style={{ textDecoration: 'none', padding: '12px 16px' }}>
-          <div className="kpi-icon kpi-icon-blue" style={{ width: '38px', height: '38px', fontSize: '1.1rem' }}>✅</div>
+          <div className="kpi-icon kpi-icon-blue" style={{ width: '38px', height: '38px' }}>
+            <Icon name="check-circle" size={18} color="#2563eb" />
+          </div>
           <div className="kpi-content">
             <span className="kpi-label">Đã duyệt chờ nhận</span>
             <span className="kpi-value" style={{ fontSize: '1.25rem', color: '#2563eb' }}>{stats.approvedBorrowings}</span>
@@ -180,7 +191,9 @@ export function AdminDashboardPage() {
         </Link>
 
         <Link to="/staff/borrowings?status=BORROWED" className="kpi-card" style={{ textDecoration: 'none', padding: '12px 16px' }}>
-          <div className="kpi-icon kpi-icon-purple" style={{ width: '38px', height: '38px', fontSize: '1.1rem' }}>🤝</div>
+          <div className="kpi-icon kpi-icon-purple" style={{ width: '38px', height: '38px' }}>
+            <Icon name="handshake" size={18} color="#7c3aed" />
+          </div>
           <div className="kpi-content">
             <span className="kpi-label">Đang mượn</span>
             <span className="kpi-value text-purple" style={{ fontSize: '1.25rem' }}>{stats.borrowedBorrowings}</span>
@@ -188,9 +201,11 @@ export function AdminDashboardPage() {
         </Link>
 
         <Link to="/staff/borrowings?status=RETURNED" className="kpi-card" style={{ textDecoration: 'none', padding: '12px 16px' }}>
-          <div className="kpi-icon kpi-icon-green" style={{ width: '38px', height: '38px', fontSize: '1.1rem' }}>📥</div>
+          <div className="kpi-icon kpi-icon-green" style={{ width: '38px', height: '38px' }}>
+            <Icon name="return" size={18} color="var(--color-success)" />
+          </div>
           <div className="kpi-content">
-            <span className="kpi-label">Đã hoàn trả</span>
+            <span className="kpi-label">Đã trả</span>
             <span className="kpi-value text-green" style={{ fontSize: '1.25rem' }}>{stats.returnedBorrowings}</span>
           </div>
         </Link>
@@ -203,16 +218,16 @@ export function AdminDashboardPage() {
         </div>
         <div className="quick-action-buttons">
           <Link to="/admin/equipments" className="btn btn-outline btn-sm">
-            📦 Danh mục thiết bị
+            <Icon name="box" size={14} /> Danh mục thiết bị
           </Link>
           <Link to="/admin/equipments/new" className="btn btn-outline btn-sm">
-            ➕ Thêm thiết bị mới
+            <Icon name="plus" size={14} /> Thêm thiết bị mới
           </Link>
           <Link to="/admin/users" className="btn btn-outline btn-sm">
-            👥 Danh sách người dùng
+            <Icon name="users" size={14} /> Danh sách người dùng
           </Link>
           <Link to="/staff/borrowings" className="btn btn-outline btn-sm">
-            📋 Quản lý quy trình mượn trả
+            <Icon name="clipboard" size={14} /> Quản lý quy trình mượn trả
           </Link>
         </div>
       </div>
@@ -220,7 +235,7 @@ export function AdminDashboardPage() {
       {/* Recent Borrowings Table */}
       <div className="card">
         <div className="card-header flex-between">
-          <h2 className="card-title">📋 Phiếu mượn thiết bị mới nhất</h2>
+          <h2 className="card-title">Phiếu mượn thiết bị mới nhất</h2>
           <Link to="/staff/borrowings" className="btn btn-outline btn-sm">
             Xem tất cả &raquo;
           </Link>
@@ -228,7 +243,7 @@ export function AdminDashboardPage() {
         <div className="card-body p-0">
           {recentBorrowings.length === 0 ? (
             <EmptyState
-              icon="📭"
+              icon="inbox"
               title="Chưa có phiếu mượn nào"
               description="Hệ thống chưa ghi nhận phiếu mượn thiết bị nào."
             />
@@ -269,7 +284,7 @@ export function AdminDashboardPage() {
                         {b.purpose}
                       </td>
                       <td style={{ textAlign: 'center' }}>
-                        <span className="badge badge-light" style={{ fontWeight: 600 }}>
+                        <span className="badge badge-borrower font-bold">
                           {b.total_items || 1}
                         </span>
                       </td>

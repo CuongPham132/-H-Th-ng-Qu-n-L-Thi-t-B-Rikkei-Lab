@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ROLE_LIST } from '../../utils/constants.js';
+import Icon from '../common/Icon.jsx';
 
 /**
  * UserFormDialog Component
@@ -76,7 +77,7 @@ export function UserFormDialog({
       <div className="modal-card modal-card-md">
         <div className="modal-header">
           <h3 id="create-user-title" className="modal-title">
-            👤 Tạo tài khoản người dùng mới
+            Tạo tài khoản người dùng mới
           </h3>
           <button
             type="button"
@@ -85,7 +86,7 @@ export function UserFormDialog({
             disabled={isLoading}
             aria-label="Đóng"
           >
-            &times;
+            <Icon name="close" size={16} />
           </button>
         </div>
 
@@ -99,7 +100,7 @@ export function UserFormDialog({
                 id="createEmail"
                 name="email"
                 type="email"
-                className={`form-input ${errors.email ? 'border-danger' : ''}`}
+                className={`form-control ${errors.email ? 'border-danger' : ''}`}
                 placeholder="example@rikkeilab.vn"
                 value={formData.email}
                 onChange={handleChange}
@@ -116,7 +117,7 @@ export function UserFormDialog({
                 id="createPassword"
                 name="password"
                 type="password"
-                className={`form-input ${errors.password ? 'border-danger' : ''}`}
+                className={`form-control ${errors.password ? 'border-danger' : ''}`}
                 placeholder="Tối thiểu 8 ký tự..."
                 value={formData.password}
                 onChange={handleChange}
@@ -133,7 +134,7 @@ export function UserFormDialog({
                 id="createFullName"
                 name="full_name"
                 type="text"
-                className={`form-input ${errors.full_name ? 'border-danger' : ''}`}
+                className={`form-control ${errors.full_name ? 'border-danger' : ''}`}
                 placeholder="Nguyễn Văn A"
                 value={formData.full_name}
                 onChange={handleChange}
@@ -144,12 +145,12 @@ export function UserFormDialog({
 
             <div className="form-group mb-2">
               <label htmlFor="createRole" className="form-label" style={{ fontWeight: 600 }}>
-                Vai trò (Role) <span className="text-danger">*</span>
+                Vai trò <span className="text-danger">*</span>
               </label>
               <select
                 id="createRole"
                 name="role"
-                className="form-select"
+                className="form-control select-control"
                 value={formData.role}
                 onChange={handleChange}
                 disabled={isLoading}
@@ -170,7 +171,7 @@ export function UserFormDialog({
                 id="createPhone"
                 name="phone"
                 type="text"
-                className="form-input"
+                className="form-control"
                 placeholder="0912345678"
                 value={formData.phone}
                 onChange={handleChange}

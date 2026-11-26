@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 import authService from '../services/auth.service.js';
 import { TOKEN_STORAGE_KEY } from '../utils/constants.js';
+import { useToast } from './ToastContext.jsx';
 
 export const AuthContext = createContext(null);
 
@@ -12,6 +13,7 @@ export const AuthContext = createContext(null);
  * - Does not allow client to self-assign role; role is strictly provided by Backend
  */
 export function AuthProvider({ children }) {
+  const toast = useToast();
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_STORAGE_KEY));
   const [user, setUser] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -73,6 +75,7 @@ export function AuthProvider({ children }) {
       setUser(null);
       setToken(null);
       setIsInitializing(false);
+      toast.warning('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
     };
 
     window.addEventListener('auth:unauthorized', handleUnauthorized);

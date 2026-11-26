@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { EQUIPMENT_STATUS_LIST } from '../../utils/constants.js';
+import Icon from '../common/Icon.jsx';
 
 /**
  * EquipmentStatusDialog Component
@@ -37,7 +38,7 @@ export function EquipmentStatusDialog({
       <div className="modal-card modal-card-md">
         <div className="modal-header">
           <h3 id="eq-status-title" className="modal-title">
-            ⚙️ Cập nhật trạng thái thiết bị
+            Cập nhật trạng thái thiết bị
           </h3>
           <button
             type="button"
@@ -46,7 +47,7 @@ export function EquipmentStatusDialog({
             disabled={isLoading}
             aria-label="Đóng"
           >
-            &times;
+            <Icon name="close" size={16} />
           </button>
         </div>
 
@@ -62,7 +63,7 @@ export function EquipmentStatusDialog({
               </label>
               <select
                 id="equipmentStatus"
-                className="form-select"
+                className="form-control select-control"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 disabled={isLoading}
@@ -81,7 +82,7 @@ export function EquipmentStatusDialog({
               </label>
               <select
                 id="equipmentActive"
-                className="form-select"
+                className="form-control select-control"
                 value={isActive}
                 onChange={(e) => setIsActive(Number(e.target.value))}
                 disabled={isLoading}
@@ -91,8 +92,9 @@ export function EquipmentStatusDialog({
               </select>
             </div>
 
-            <div className="notice-banner" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe', color: '#1e40af' }}>
-              ℹ️ Thiết bị chỉ có thể được mượn khi ở trạng thái <strong>AVAILABLE</strong> và kích hoạt <strong>Hoạt động</strong>.
+            <div className="notice-banner" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Icon name="info" size={16} color="#2563eb" />
+              <span>Thiết bị chỉ có thể được mượn khi ở trạng thái <strong>Có sẵn</strong> và kích hoạt <strong>Hoạt động</strong>.</span>
             </div>
           </div>
 

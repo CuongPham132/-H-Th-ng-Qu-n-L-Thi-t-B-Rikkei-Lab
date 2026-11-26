@@ -8,9 +8,13 @@ import HandoverDialog from '../components/borrowing/HandoverDialog.jsx';
 import ReturnDialog from '../components/borrowing/ReturnDialog.jsx';
 import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
+import Icon from '../components/common/Icon.jsx';
+import Breadcrumb from '../components/common/Breadcrumb.jsx';
+import { useToast } from '../contexts/ToastContext.jsx';
 
 export function StaffBorrowingDetailPage() {
   const { id } = useParams();
+  const toast = useToast();
 
   const [borrowing, setBorrowing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +53,9 @@ export function StaffBorrowingDetailPage() {
       setIsSubmitting(true);
       setErrorMsg('');
       await borrowingService.approveBorrowing(borrowing.id);
-      setActionSuccess('Duyệt phiếu mượn thành công! Đã giữ kho và chuyển trạng thái sang ĐÃ DUYỆT (APPROVED).');
+      const msg = 'Duyệt phiếu mượn thành công! Đã giữ kho và chuyển trạng thái sang Đã duyệt.';
+      setActionSuccess(msg);
+      toast.success(msg);
       setShowApproveModal(false);
       await fetchBorrowingDetail();
     } catch (err) {
@@ -66,7 +72,9 @@ export function StaffBorrowingDetailPage() {
       setIsSubmitting(true);
       setErrorMsg('');
       await borrowingService.rejectBorrowing(borrowing.id, rejectionReason);
-      setActionSuccess('Đã từ chối phiếu mượn thành công. Đơn chuyển sang trạng thái TỪ CHỐI (REJECTED).');
+      const msg = 'Đã từ chối phiếu mượn thành công. Đơn chuyển sang trạng thái Bị từ chối.';
+      setActionSuccess(msg);
+      toast.success(msg);
       setShowRejectModal(false);
       await fetchBorrowingDetail();
     } catch (err) {
@@ -83,7 +91,9 @@ export function StaffBorrowingDetailPage() {
       setIsSubmitting(true);
       setErrorMsg('');
       await borrowingService.handoverBorrowing(borrowing.id, borrowingDays);
-      setActionSuccess('Bàn giao thiết bị thành công! Đơn chuyển sang trạng thái ĐANG MƯỢN (BORROWED).');
+      const msg = 'Bàn giao thiết bị thành công! Đơn chuyển sang trạng thái Đang mượn.';
+      setActionSuccess(msg);
+      toast.success(msg);
       setShowHandoverModal(false);
       await fetchBorrowingDetail();
     } catch (err) {
@@ -100,11 +110,11 @@ export function StaffBorrowingDetailPage() {
       setIsSubmitting(true);
       setErrorMsg('');
       const updated = await borrowingService.returnBorrowing(borrowing.id, items);
-      if (updated.status === 'RETURNED') {
-        setActionSuccess('Hoàn tất nhận trả toàn bộ thiết bị! Phiếu mượn đã chuyển sang trạng thái ĐÃ HOÀN TRẢ (RETURNED).');
-      } else {
-        setActionSuccess('Tiếp nhận hoàn trả một phần thành công! Phiếu mượn tiếp tục ở trạng thái ĐANG MƯỢN (BORROWED).');
-      }
+      const msg = updated.status === 'RETURNED'
+        ? 'Hoàn tất nhận trả toàn bộ thiết bị! Phiếu mượn đã chuyển sang trạng thái Đã trả.'
+        : 'Tiếp nhận hoàn trả một phần thành công! Phiếu mượn tiếp tục ở trạng thái Đang mượn.';
+      setActionSuccess(msg);
+      toast.success(msg);
       setShowReturnModal(false);
       await fetchBorrowingDetail();
     } catch (err) {
@@ -147,6 +157,12 @@ export function StaffBorrowingDetailPage() {
 
   return (
     <div className="staff-borrowing-detail-page">
+      <Breadcrumb
+        items={[
+          { label: 'Quản lý mượn trả', to: '/staff/borrowings' },
+          { label: borrowing.borrowing_code || `Phiếu #${borrowing.id}` },
+        ]}
+      />
       {/* Top Action Bar */}
       <div className="action-bar-top">
         <Link to="/staff/borrowings" className="btn btn-outline-sm">
@@ -162,14 +178,14 @@ export function StaffBorrowingDetailPage() {
                 className="btn btn-primary"
                 onClick={() => setShowApproveModal(true)}
               >
-                ✅ Duyệt yêu cầu
+                <Icon name="check" size={14} /> Duyệt yêu cầu
               </button>
               <button
                 type="button"
                 className="btn btn-outline-danger"
                 onClick={() => setShowRejectModal(true)}
               >
-                ❌ Từ chối
+                <Icon name="close" size={14} /> Từ chối
               </button>
             </>
           )}
@@ -181,14 +197,14 @@ export function StaffBorrowingDetailPage() {
                 className="btn btn-primary"
                 onClick={() => setShowHandoverModal(true)}
               >
-                🤝 Bàn giao thiết bị
+                <Icon name="handshake" size={14} /> Bàn giao thiết bị
               </button>
               <button
                 type="button"
                 className="btn btn-outline-danger"
                 onClick={() => setShowRejectModal(true)}
               >
-                ❌ Từ chối / Hủy duyệt
+                <Icon name="close" size={14} /> Từ chối / Hủy duyệt
               </button>
             </>
           )}
@@ -199,7 +215,7 @@ export function StaffBorrowingDetailPage() {
               className="btn btn-primary"
               onClick={() => setShowReturnModal(true)}
             >
-              📥 Tiếp nhận hoàn trả
+              <Icon name="return" size={14} /> Tiếp nhận hoàn trả
             </button>
           )}
         </div>
@@ -208,8 +224,11 @@ export function StaffBorrowingDetailPage() {
       {/* Notifications */}
       {errorMsg && <ErrorMessage message={errorMsg} />}
       {actionSuccess && (
-        <div className="notice-banner mb-3" style={{ backgroundColor: '#f0fdf4', borderColor: '#86efac', color: '#166534' }}>
-          ✅ {actionSuccess}
+        <div className="success-banner" role="status">
+          <span className="success-icon">
+            <Icon name="check-circle" size={18} color="var(--color-success)" />
+          </span>
+          <p className="success-text">{actionSuccess}</p>
         </div>
       )}
 
@@ -232,7 +251,9 @@ export function StaffBorrowingDetailPage() {
           <div className="audit-info-grid">
             {/* Borrower Card */}
             <div className="audit-card">
-              <div className="audit-card-title">👤 Thông tin người mượn</div>
+              <div className="audit-card-title">
+                <Icon name="user" size={15} /> Thông tin người mượn
+              </div>
               <div className="audit-item">
                 <span className="audit-label">Họ và tên:</span>
                 <strong>{borrowing.borrower_name}</strong>
@@ -246,17 +267,19 @@ export function StaffBorrowingDetailPage() {
                 {borrowing.borrower_phone || 'Chưa cung cấp'}
               </div>
               <div className="audit-item">
-                <span className="audit-label">ID Người dùng:</span>
+                <span className="audit-label">Mã tài khoản:</span>
                 #{borrowing.borrower_id}
               </div>
             </div>
 
             {/* Approval Info */}
             <div className="audit-card">
-              <div className="audit-card-title">✅ Kiểm duyệt &amp; Nhận thiết bị</div>
+              <div className="audit-card-title">
+                <Icon name="check" size={15} /> Kiểm duyệt &amp; Nhận thiết bị
+              </div>
               <div className="audit-item">
                 <span className="audit-label">Người duyệt:</span>
-                {borrowing.approver_name || (borrowing.approved_by ? `Staff #${borrowing.approved_by}` : 'Chưa duyệt')}
+                {borrowing.approver_name || (borrowing.approved_by ? `Nhân viên #${borrowing.approved_by}` : 'Chưa duyệt')}
               </div>
               <div className="audit-item">
                 <span className="audit-label">Thời điểm duyệt:</span>
@@ -272,7 +295,9 @@ export function StaffBorrowingDetailPage() {
 
             {/* Handover & Return Info */}
             <div className="audit-card">
-              <div className="audit-card-title">📦 Bàn giao &amp; Thu hồi</div>
+              <div className="audit-card-title">
+                <Icon name="box" size={15} /> Bàn giao &amp; Thu hồi
+              </div>
               <div className="audit-item">
                 <span className="audit-label">Ngày bàn giao thực tế:</span>
                 {formatDate(borrowing.borrowed_at)}
@@ -294,10 +319,13 @@ export function StaffBorrowingDetailPage() {
 
           {/* Rejection / Cancellation Details if applicable */}
           {(borrowing.rejection_reason || borrowing.rejected_at) && (
-            <div className="notice-banner mb-3" style={{ backgroundColor: '#fef2f2', borderColor: '#fca5a5', color: '#991b1b' }}>
-              <strong>Lý do từ chối:</strong> {borrowing.rejection_reason || 'Không có lý do chi tiết'}
-              <div style={{ fontSize: '0.8rem', marginTop: '4px' }}>
-                Thời điểm từ chối: {formatDate(borrowing.rejected_at)}
+            <div className="notice-banner mb-3" style={{ backgroundColor: '#fef2f2', borderColor: '#fca5a5', color: '#991b1b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Icon name="alert" size={16} color="#dc2626" />
+              <div>
+                <strong>Lý do từ chối:</strong> {borrowing.rejection_reason || 'Không có lý do chi tiết'}
+                <div style={{ fontSize: '0.8rem', marginTop: '2px' }}>
+                  Thời điểm từ chối: {formatDate(borrowing.rejected_at)}
+                </div>
               </div>
             </div>
           )}
@@ -315,7 +343,7 @@ export function StaffBorrowingDetailPage() {
           {borrowing.notes && (
             <div className="mt-3">
               <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--color-navy)', marginBottom: '4px' }}>
-                Ghi chú &amp; Nhật ký hệ thống:
+                Ghi chú phiếu mượn:
               </h4>
               <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', background: '#fafbfc', padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                 {borrowing.notes}
@@ -328,7 +356,7 @@ export function StaffBorrowingDetailPage() {
       {/* Equipment List Table */}
       <div className="card">
         <div className="card-header flex-between">
-          <h3 className="card-title">📦 Danh mục thiết bị trong phiếu mượn</h3>
+          <h3 className="card-title">Danh mục thiết bị trong phiếu mượn</h3>
           <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
             Tổng số: <strong>{borrowing.items?.length || 0}</strong> loại thiết bị
           </span>
@@ -359,7 +387,7 @@ export function StaffBorrowingDetailPage() {
                         <strong>{item.equipment_name}</strong>
                       </td>
                       <td>
-                        <span className="badge badge-light">{item.category}</span>
+                        <span className="category-pill">{item.category}</span>
                       </td>
                       <td style={{ textAlign: 'center', fontWeight: 700 }}>
                         {item.quantity}

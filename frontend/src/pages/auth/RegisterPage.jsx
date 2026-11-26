@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth.js';
 import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 import Loading from '../../components/common/Loading.jsx';
+import Icon from '../../components/common/Icon.jsx';
 
 export function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ export function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [errorDetails, setErrorDetails] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [successMsg, setSuccessMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,6 +40,9 @@ export function RegisterPage() {
       setErrorMsg('');
       setErrorDetails(null);
     }
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -46,43 +51,46 @@ export function RegisterPage() {
 
     setErrorMsg('');
     setErrorDetails(null);
+    setFieldErrors({});
     setSuccessMsg('');
 
     const fullNameTrimmed = formData.full_name.trim();
     const emailTrimmed = formData.email.trim();
     const phoneTrimmed = formData.phone.trim();
 
+    const errors = {};
+
     // Client-side validations
     if (!fullNameTrimmed) {
-      setErrorMsg('Vui lòng nhập họ và tên.');
-      return;
-    }
-    if (fullNameTrimmed.length < 2 || fullNameTrimmed.length > 100) {
-      setErrorMsg('Họ và tên phải có độ dài từ 2 đến 100 ký tự.');
-      return;
+      errors.full_name = 'Vui lòng nhập họ và tên.';
+    } else if (fullNameTrimmed.length < 2 || fullNameTrimmed.length > 100) {
+      errors.full_name = 'Họ và tên phải có độ dài từ 2 đến 100 ký tự.';
     }
 
     if (!emailTrimmed) {
-      setErrorMsg('Vui lòng nhập địa chỉ email.');
-      return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(emailTrimmed)) {
-      setErrorMsg('Địa chỉ email không đúng định dạng.');
-      return;
+      errors.email = 'Vui lòng nhập địa chỉ email.';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailTrimmed)) {
+        errors.email = 'Địa chỉ email không đúng định dạng.';
+      }
     }
 
     if (!formData.password) {
-      setErrorMsg('Vui lòng nhập mật khẩu.');
-      return;
-    }
-    if (formData.password.length < 8) {
-      setErrorMsg('Mật khẩu bắt buộc và phải có ít nhất 8 ký tự.');
-      return;
+      errors.password = 'Vui lòng nhập mật khẩu.';
+    } else if (formData.password.length < 8) {
+      errors.password = 'Mật khẩu bắt buộc và phải có ít nhất 8 ký tự.';
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setErrorMsg('Mật khẩu xác nhận không khớp với mật khẩu đã nhập.');
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = 'Vui lòng xác nhận lại mật khẩu.';
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Mật khẩu xác nhận không khớp với mật khẩu đã nhập.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setErrorMsg('Vui lòng kiểm tra và sửa các thông tin bên dưới.');
       return;
     }
 
@@ -98,7 +106,6 @@ export function RegisterPage() {
       });
 
       setSuccessMsg('Đăng ký tài khoản thành công! Vui lòng đăng nhập với tài khoản vừa tạo.');
-      // Do NOT auto-authenticate. Redirect to login.
       setTimeout(() => {
         navigate('/login', { replace: true });
       }, 2000);
@@ -117,14 +124,16 @@ export function RegisterPage() {
         <div className="auth-header">
           <div className="auth-logo">RL</div>
           <h2 className="auth-title">Đăng Ký Tài Khoản</h2>
-          <p className="auth-subtitle">Tài khoản đăng ký mặc định có vai trò Người Mượn (Borrower)</p>
+          <p className="auth-subtitle">Tài khoản đăng ký mặc định có vai trò Người mượn</p>
         </div>
 
         <ErrorMessage message={errorMsg} details={errorDetails} />
 
         {successMsg && (
           <div className="success-banner" role="status">
-            <span className="success-icon">✅</span>
+            <span className="success-icon">
+              <Icon name="check-circle" size={18} color="var(--color-success)" />
+            </span>
             <div className="success-content">
               <p className="success-text">{successMsg}</p>
               <Link to="/login" className="btn btn-sm btn-primary mt-2">
@@ -143,7 +152,7 @@ export function RegisterPage() {
               id="reg-name"
               type="text"
               name="full_name"
-              className="form-control"
+              className={`form-control ${fieldErrors.full_name ? 'input-has-error' : ''}`}
               placeholder="Nguyễn Văn A"
               value={formData.full_name}
               onChange={handleChange}
@@ -151,6 +160,7 @@ export function RegisterPage() {
               autoFocus
               required
             />
+            {fieldErrors.full_name && <span className="field-error-text">{fieldErrors.full_name}</span>}
           </div>
 
           <div className="form-group">
@@ -161,7 +171,7 @@ export function RegisterPage() {
               id="reg-email"
               type="email"
               name="email"
-              className="form-control"
+              className={`form-control ${fieldErrors.email ? 'input-has-error' : ''}`}
               placeholder="ten.nguoidung@rikkeilab.vn"
               value={formData.email}
               onChange={handleChange}
@@ -169,6 +179,7 @@ export function RegisterPage() {
               autoComplete="email"
               required
             />
+            {fieldErrors.email && <span className="field-error-text">{fieldErrors.email}</span>}
           </div>
 
           <div className="form-group">
@@ -197,7 +208,7 @@ export function RegisterPage() {
                   id="reg-password"
                   type={showPassword ? 'text' : 'password'}
                   name="password"
-                  className="form-control"
+                  className={`form-control ${fieldErrors.password ? 'input-has-error' : ''}`}
                   placeholder="Tối thiểu 8 ký tự"
                   value={formData.password}
                   onChange={handleChange}
@@ -213,9 +224,10 @@ export function RegisterPage() {
                   aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                   tabIndex="-1"
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  <Icon name="eye" size={16} />
                 </button>
               </div>
+              {fieldErrors.password && <span className="field-error-text">{fieldErrors.password}</span>}
             </div>
 
             <div className="form-group form-col">
@@ -227,7 +239,7 @@ export function RegisterPage() {
                   id="reg-confirm-password"
                   type={showConfirmPassword ? 'text' : 'password'}
                   name="confirmPassword"
-                  className="form-control"
+                  className={`form-control ${fieldErrors.confirmPassword ? 'input-has-error' : ''}`}
                   placeholder="Nhập lại mật khẩu"
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -243,9 +255,10 @@ export function RegisterPage() {
                   aria-label={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                   tabIndex="-1"
                 >
-                  {showConfirmPassword ? '🙈' : '👁️'}
+                  <Icon name="eye" size={16} />
                 </button>
               </div>
+              {fieldErrors.confirmPassword && <span className="field-error-text">{fieldErrors.confirmPassword}</span>}
             </div>
           </div>
 

@@ -7,9 +7,12 @@ import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
 import EmptyState from '../components/common/EmptyState.jsx';
 import ConfirmDialog from '../components/common/ConfirmDialog.jsx';
+import Icon from '../components/common/Icon.jsx';
+import { useToast } from '../contexts/ToastContext.jsx';
 
 export function BorrowingListPage() {
   const location = useLocation();
+  const toast = useToast();
   const [borrowings, setBorrowings] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
   const [isLoading, setIsLoading] = useState(true);
@@ -19,6 +22,7 @@ export function BorrowingListPage() {
   // Filter state
   const [statusFilter, setStatusFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('default');
 
   // Cancel dialog state
   const [cancelTarget, setCancelTarget] = useState(null);
@@ -69,7 +73,9 @@ export function BorrowingListPage() {
     try {
       setIsCancelling(true);
       await borrowingService.cancelBorrowing(cancelTarget.id, cancelReason);
-      setSuccessBanner(`Hủy phiếu mượn ${cancelTarget.borrowing_code} thành công.`);
+      const msg = `Hủy phiếu mượn ${cancelTarget.borrowing_code} thành công.`;
+      setSuccessBanner(msg);
+      toast.success(msg);
       setCancelTarget(null);
       await fetchBorrowings(pagination.page);
     } catch (err) {
@@ -81,14 +87,20 @@ export function BorrowingListPage() {
 
   const statusOptions = [
     { value: '', label: 'Tất cả trạng thái' },
-    { value: 'PENDING', label: 'Chờ duyệt (PENDING)' },
-    { value: 'APPROVED', label: 'Đã duyệt (APPROVED)' },
-    { value: 'BORROWED', label: 'Đang mượn (BORROWED)' },
-    { value: 'RETURNED', label: 'Đã hoàn trả (RETURNED)' },
-    { value: 'CANCELLED', label: 'Đã hủy (CANCELLED)' },
-    { value: 'REJECTED', label: 'Bị từ chối (REJECTED)' },
-    { value: 'EXPIRED', label: 'Quá hạn nhận (EXPIRED)' },
+    { value: 'PENDING', label: 'Chờ duyệt' },
+    { value: 'APPROVED', label: 'Đã duyệt' },
+    { value: 'BORROWED', label: 'Đang mượn' },
+    { value: 'RETURNED', label: 'Đã trả' },
+    { value: 'CANCELLED', label: 'Đã hủy' },
+    { value: 'REJECTED', label: 'Bị từ chối' },
+    { value: 'EXPIRED', label: 'Quá hạn nhận' },
   ];
+
+  const displayedBorrowings = [...borrowings].sort((a, b) => {
+    if (sortBy === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
+    if (sortBy === 'code_asc') return (a.borrowing_code || '').localeCompare(b.borrowing_code || '');
+    return 0;
+  });
 
   return (
     <div className="borrowing-list-page">
@@ -100,7 +112,7 @@ export function BorrowingListPage() {
           </p>
         </div>
         <Link to="/borrower/borrowings/create" className="btn btn-primary">
-          + Tạo Yêu Cầu Mượn Mới
+          <Icon name="plus" size={15} /> Tạo yêu cầu mượn mới
         </Link>
       </div>
 
@@ -108,7 +120,9 @@ export function BorrowingListPage() {
 
       {successBanner && (
         <div className="success-banner" role="status">
-          <span className="success-icon">✅</span>
+          <span className="success-icon">
+            <Icon name="check-circle" size={18} color="var(--color-success)" />
+          </span>
           <p className="success-text">{successBanner}</p>
         </div>
       )}
@@ -117,7 +131,9 @@ export function BorrowingListPage() {
       <div className="card filter-card">
         <form onSubmit={handleSearchSubmit} className="filter-form">
           <div className="search-input-group">
-            <span className="search-icon">🔍</span>
+            <span className="search-icon">
+              <Icon name="search" size={16} />
+            </span>
             <input
               type="text"
               className="form-control search-input"
@@ -141,9 +157,22 @@ export function BorrowingListPage() {
             </select>
           </div>
 
+          <div style={{ minWidth: '150px' }}>
+            <select
+              className="form-control select-control"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              title="Sắp xếp"
+            >
+              <option value="default">Sắp xếp: Mới nhất</option>
+              <option value="date_asc">Ngày tạo (Cũ nhất)</option>
+              <option value="code_asc">Mã phiếu (A &rarr; Z)</option>
+            </select>
+          </div>
+
           <div className="filter-actions">
             <button type="submit" className="btn btn-primary">
-              Lọc phiếu
+              <Icon name="search" size={14} /> Lọc phiếu
             </button>
             {(statusFilter || searchTerm) && (
               <button
@@ -167,7 +196,7 @@ export function BorrowingListPage() {
       ) : borrowings.length > 0 ? (
         <div className="card p-0">
           <BorrowingTable
-            borrowings={borrowings}
+            borrowings={displayedBorrowings}
             onCancel={handleOpenCancel}
           />
           <div className="p-3">
@@ -181,7 +210,7 @@ export function BorrowingListPage() {
         </div>
       ) : (
         <EmptyState
-          icon="📋"
+          icon="clipboard"
           title="Không tìm thấy phiếu mượn nào"
           description={
             statusFilter || searchTerm
@@ -190,7 +219,7 @@ export function BorrowingListPage() {
           }
           action={
             <Link to="/borrower/borrowings/create" className="btn btn-primary">
-              Tạo yêu cầu mượn ngay
+              <Icon name="plus" size={15} /> Tạo yêu cầu mượn ngay
             </Link>
           }
         />

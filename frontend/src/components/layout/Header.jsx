@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth.js';
+import Icon from '../common/Icon.jsx';
 
 export function Header() {
   const { user, logout } = useAuth();
@@ -26,12 +27,12 @@ export function Header() {
   const getRoleLabel = (role) => {
     switch (role) {
       case 'ADMIN':
-        return 'Quản trị viên (ADMIN)';
+        return 'Quản trị viên';
       case 'STAFF':
-        return 'Nhân viên Lab (STAFF)';
+        return 'Nhân viên Lab';
       case 'BORROWER':
       default:
-        return 'Người mượn (BORROWER)';
+        return 'Người mượn';
     }
   };
 
@@ -57,6 +58,7 @@ export function Header() {
               onClick={handleLogout}
               title="Đăng xuất khỏi hệ thống"
             >
+              <Icon name="logout" size={14} style={{ marginRight: 6 }} />
               Đăng xuất
             </button>
           </div>

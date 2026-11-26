@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Icon from '../common/Icon.jsx';
 
 /**
  * ReturnDialog Component
@@ -56,7 +57,7 @@ export function ReturnDialog({
     e.preventDefault();
 
     if (returnAll) {
-      // Return ALL remaining items (null payload sends empty items which backend interprets as full return)
+      // Return ALL remaining items
       onConfirm(null);
       return;
     }
@@ -97,7 +98,7 @@ export function ReturnDialog({
       <div className="modal-card modal-card-lg">
         <div className="modal-header">
           <h3 id="return-dialog-title" className="modal-title">
-            📥 Tiếp nhận hoàn trả thiết bị
+            Tiếp nhận hoàn trả thiết bị
           </h3>
           <button
             type="button"
@@ -106,7 +107,7 @@ export function ReturnDialog({
             disabled={isLoading}
             aria-label="Đóng"
           >
-            &times;
+            <Icon name="close" size={16} />
           </button>
         </div>
 
@@ -209,13 +210,15 @@ export function ReturnDialog({
             </div>
 
             {validationError && (
-              <div className="text-danger mb-3" style={{ fontSize: '0.85rem' }}>
-                ⚠️ {validationError}
+              <div className="text-danger mb-3" style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Icon name="alert" size={15} color="#dc2626" />
+                <span>{validationError}</span>
               </div>
             )}
 
-            <div className="notice-banner" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe', color: '#1e40af' }}>
-              ℹ️ Nếu tất cả thiết bị được trả đủ, hệ thống sẽ tự động cập nhật trạng thái đơn thành <strong>ĐÃ HOÀN TRẢ (RETURNED)</strong>. Nếu trả một phần, đơn vẫn giữ trạng thái <strong>ĐANG MƯỢN (BORROWED)</strong> để tiếp tục theo dõi.
+            <div className="notice-banner" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Icon name="info" size={16} color="#2563eb" />
+              <span>Nếu tất cả thiết bị được trả đủ, hệ thống sẽ tự động cập nhật trạng thái đơn thành <strong>Đã trả</strong>. Nếu trả một phần, đơn vẫn giữ trạng thái <strong>Đang mượn</strong> để tiếp tục theo dõi.</span>
             </div>
           </div>
 

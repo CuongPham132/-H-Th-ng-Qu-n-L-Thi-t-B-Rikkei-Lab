@@ -21,13 +21,13 @@ export const BORROWING_STATUS = {
 };
 
 export const BORROWING_STATUS_LIST = [
-  { value: 'PENDING', label: 'Chờ duyệt (PENDING)' },
-  { value: 'APPROVED', label: 'Đã duyệt (APPROVED)' },
-  { value: 'BORROWED', label: 'Đang mượn (BORROWED)' },
-  { value: 'RETURNED', label: 'Đã hoàn trả (RETURNED)' },
-  { value: 'REJECTED', label: 'Bị từ chối (REJECTED)' },
-  { value: 'CANCELLED', label: 'Đã hủy (CANCELLED)' },
-  { value: 'EXPIRED', label: 'Hết hạn (EXPIRED)' },
+  { value: 'PENDING', label: 'Chờ duyệt' },
+  { value: 'APPROVED', label: 'Đã duyệt' },
+  { value: 'BORROWED', label: 'Đang mượn' },
+  { value: 'RETURNED', label: 'Đã trả' },
+  { value: 'REJECTED', label: 'Bị từ chối' },
+  { value: 'CANCELLED', label: 'Đã hủy' },
+  { value: 'EXPIRED', label: 'Quá hạn nhận' },
 ];
 
 export const EQUIPMENT_STATUS = {
@@ -37,15 +37,15 @@ export const EQUIPMENT_STATUS = {
 };
 
 export const EQUIPMENT_STATUS_LIST = [
-  { value: 'AVAILABLE', label: 'Sẵn sàng cho mượn (AVAILABLE)' },
-  { value: 'MAINTENANCE', label: 'Đang bảo trì (MAINTENANCE)' },
-  { value: 'DISCONTINUED', label: 'Ngừng sử dụng (DISCONTINUED)' },
+  { value: 'AVAILABLE', label: 'Có sẵn' },
+  { value: 'MAINTENANCE', label: 'Đang bảo trì' },
+  { value: 'DISCONTINUED', label: 'Ngừng sử dụng' },
 ];
 
 export const ROLE_LIST = [
-  { value: 'BORROWER', label: 'Người mượn (BORROWER)' },
-  { value: 'STAFF', label: 'Nhân viên Lab (STAFF)' },
-  { value: 'ADMIN', label: 'Quản trị viên (ADMIN)' },
+  { value: 'BORROWER', label: 'Người mượn' },
+  { value: 'STAFF', label: 'Nhân viên Lab' },
+  { value: 'ADMIN', label: 'Quản trị viên' },
 ];
 
 /**

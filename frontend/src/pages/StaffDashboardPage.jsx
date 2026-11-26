@@ -6,6 +6,7 @@ import StatusBadge from '../components/common/StatusBadge.jsx';
 import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
 import EmptyState from '../components/common/EmptyState.jsx';
+import Icon from '../components/common/Icon.jsx';
 
 export function StaffDashboardPage() {
   const { user } = useAuth();
@@ -28,14 +29,14 @@ export function StaffDashboardPage() {
       setIsLoading(true);
       setErrorMsg('');
 
-      // Fetch accurate real-time counts using real Backend pagination queries (limit: 1 to get exact totals)
+      // Fetch accurate real-time counts using Backend pagination queries
       const [allRes, pendingRes, approvedRes, borrowedRes, returnedRes, recentRes] = await Promise.all([
         borrowingService.getBorrowings({ limit: 1 }),
         borrowingService.getBorrowings({ status: 'PENDING', limit: 1 }),
         borrowingService.getBorrowings({ status: 'APPROVED', limit: 1 }),
         borrowingService.getBorrowings({ status: 'BORROWED', limit: 1 }),
         borrowingService.getBorrowings({ status: 'RETURNED', limit: 1 }),
-        borrowingService.getBorrowings({ limit: 5 }), // 5 most recent
+        borrowingService.getBorrowings({ limit: 5 }),
       ]);
 
       setStats({
@@ -100,9 +101,9 @@ export function StaffDashboardPage() {
       {/* Dashboard Header */}
       <div className="dashboard-header-banner">
         <div>
-          <h1 className="dashboard-page-title">⚙️ Bảng điều khiển Quản lý Lab</h1>
+          <h1 className="dashboard-page-title">Bảng điều khiển Quản lý Lab</h1>
           <p className="text-muted">
-            Xin chào, <strong>{user?.full_name}</strong> ({user?.role})! Theo dõi trạng thái mượn trả và xử lý yêu cầu thiết bị.
+            Xin chào, <strong>{user?.full_name}</strong>! Theo dõi trạng thái mượn trả và xử lý yêu cầu thiết bị phòng Lab.
           </p>
         </div>
         <div className="dashboard-header-actions">
@@ -111,12 +112,14 @@ export function StaffDashboardPage() {
             className="btn btn-outline btn-sm"
             onClick={handleProcessExpired}
             disabled={isProcessingExpired}
-            title="Quét các đơn APPROVED đã quá 48h nhận thiết bị để hoàn trả tồn kho"
+            title="Quét các đơn đã duyệt quá hạn nhận để hoàn trả tồn kho"
           >
-            {isProcessingExpired ? 'Đang quét quá hạn...' : '⏰ Quét đơn quá hạn'}
+            <Icon name="clock" size={14} />
+            {isProcessingExpired ? 'Đang quét quá hạn...' : 'Quét đơn quá hạn'}
           </button>
           <Link to="/staff/borrowings" className="btn btn-primary btn-sm">
-            📋 Quản lý toàn bộ phiếu
+            <Icon name="clipboard" size={14} />
+            Quản lý toàn bộ phiếu
           </Link>
         </div>
       </div>
@@ -124,15 +127,20 @@ export function StaffDashboardPage() {
       {/* Notifications */}
       {errorMsg && <ErrorMessage message={errorMsg} />}
       {actionSuccess && (
-        <div className="notice-banner mb-3" style={{ backgroundColor: '#f0fdf4', borderColor: '#86efac', color: '#166534' }}>
-          ✅ {actionSuccess}
+        <div className="success-banner" role="status">
+          <span className="success-icon">
+            <Icon name="check-circle" size={18} color="var(--color-success)" />
+          </span>
+          <p className="success-text">{actionSuccess}</p>
         </div>
       )}
 
       {/* KPI Cards Grid */}
       <div className="kpi-grid">
         <div className="kpi-card">
-          <div className="kpi-icon kpi-icon-blue">📊</div>
+          <div className="kpi-icon kpi-icon-blue">
+            <Icon name="clipboard" size={22} color="var(--color-primary)" />
+          </div>
           <div className="kpi-content">
             <span className="kpi-label">Tổng số phiếu mượn</span>
             <span className="kpi-value">{stats.total}</span>
@@ -140,15 +148,19 @@ export function StaffDashboardPage() {
         </div>
 
         <Link to="/staff/borrowings?status=PENDING" className="kpi-card" style={{ textDecoration: 'none' }}>
-          <div className="kpi-icon kpi-icon-amber">⏳</div>
+          <div className="kpi-icon kpi-icon-amber">
+            <Icon name="clock" size={22} color="var(--color-warning)" />
+          </div>
           <div className="kpi-content">
-            <span className="kpi-label">Chờ duyệt (PENDING)</span>
+            <span className="kpi-label">Chờ duyệt</span>
             <span className="kpi-value text-amber">{stats.pending}</span>
           </div>
         </Link>
 
         <Link to="/staff/borrowings?status=APPROVED" className="kpi-card" style={{ textDecoration: 'none' }}>
-          <div className="kpi-icon kpi-icon-blue">✅</div>
+          <div className="kpi-icon kpi-icon-blue">
+            <Icon name="check-circle" size={22} color="#2563eb" />
+          </div>
           <div className="kpi-content">
             <span className="kpi-label">Đã duyệt / Chờ nhận</span>
             <span className="kpi-value" style={{ color: '#2563eb' }}>{stats.approved}</span>
@@ -156,17 +168,21 @@ export function StaffDashboardPage() {
         </Link>
 
         <Link to="/staff/borrowings?status=BORROWED" className="kpi-card" style={{ textDecoration: 'none' }}>
-          <div className="kpi-icon kpi-icon-purple">🤝</div>
+          <div className="kpi-icon kpi-icon-purple">
+            <Icon name="handshake" size={22} color="#7c3aed" />
+          </div>
           <div className="kpi-content">
-            <span className="kpi-label">Đang mượn (BORROWED)</span>
+            <span className="kpi-label">Đang mượn</span>
             <span className="kpi-value text-purple">{stats.borrowed}</span>
           </div>
         </Link>
 
         <Link to="/staff/borrowings?status=RETURNED" className="kpi-card" style={{ textDecoration: 'none' }}>
-          <div className="kpi-icon kpi-icon-green">📥</div>
+          <div className="kpi-icon kpi-icon-green">
+            <Icon name="return" size={22} color="var(--color-success)" />
+          </div>
           <div className="kpi-content">
-            <span className="kpi-label">Đã hoàn trả (RETURNED)</span>
+            <span className="kpi-label">Đã trả</span>
             <span className="kpi-value text-green">{stats.returned}</span>
           </div>
         </Link>
@@ -179,13 +195,13 @@ export function StaffDashboardPage() {
         </div>
         <div className="quick-action-buttons">
           <Link to="/staff/borrowings?status=PENDING" className="btn btn-outline btn-sm">
-            ⏳ Cần duyệt ({stats.pending})
+            <Icon name="clock" size={14} /> Cần duyệt ({stats.pending})
           </Link>
           <Link to="/staff/borrowings?status=APPROVED" className="btn btn-outline btn-sm">
-            📦 Chờ bàn giao ({stats.approved})
+            <Icon name="box" size={14} /> Chờ bàn giao ({stats.approved})
           </Link>
           <Link to="/staff/borrowings?status=BORROWED" className="btn btn-outline btn-sm">
-            📥 Chờ nhận trả ({stats.borrowed})
+            <Icon name="return" size={14} /> Chờ nhận trả ({stats.borrowed})
           </Link>
         </div>
       </div>
@@ -193,7 +209,7 @@ export function StaffDashboardPage() {
       {/* Recent Borrowings Table */}
       <div className="card">
         <div className="card-header flex-between">
-          <h2 className="card-title">📋 Yêu cầu mượn cần xử lý gần đây</h2>
+          <h2 className="card-title">Yêu cầu mượn cần xử lý gần đây</h2>
           <Link to="/staff/borrowings" className="btn btn-outline btn-sm">
             Xem tất cả &raquo;
           </Link>
@@ -201,7 +217,7 @@ export function StaffDashboardPage() {
         <div className="card-body p-0">
           {recentBorrowings.length === 0 ? (
             <EmptyState
-              icon="📭"
+              icon="inbox"
               title="Chưa có phiếu mượn nào"
               description="Hiện chưa có yêu cầu mượn thiết bị nào được ghi nhận trong hệ thống."
             />
@@ -242,7 +258,7 @@ export function StaffDashboardPage() {
                         {b.purpose}
                       </td>
                       <td style={{ textAlign: 'center' }}>
-                        <span className="badge badge-light" style={{ fontWeight: 600 }}>
+                        <span className="badge badge-borrower font-bold">
                           {b.total_items || 1}
                         </span>
                       </td>

@@ -1,4 +1,5 @@
 import React from 'react';
+import Icon from './Icon.jsx';
 
 /**
  * ErrorMessage Component
@@ -13,7 +14,9 @@ export function ErrorMessage({ message, details = null, onRetry = null }) {
   return (
     <div className="error-banner" role="alert">
       <div className="error-banner-content">
-        <span className="error-icon" aria-hidden="true">⚠️</span>
+        <span className="error-icon" aria-hidden="true">
+          <Icon name="alert" size={18} color="var(--color-danger)" />
+        </span>
         <div className="error-text">
           <p className="error-title">{message}</p>
           {Array.isArray(details) && details.length > 0 && (
@@ -27,6 +30,7 @@ export function ErrorMessage({ message, details = null, onRetry = null }) {
       </div>
       {onRetry && (
         <button type="button" className="btn btn-outline-danger btn-sm" onClick={onRetry}>
+          <Icon name="refresh" size={13} style={{ marginRight: 6 }} />
           Thử lại
         </button>
       )}

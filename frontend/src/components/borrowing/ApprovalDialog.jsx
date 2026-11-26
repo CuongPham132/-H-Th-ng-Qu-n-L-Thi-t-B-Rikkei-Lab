@@ -1,4 +1,5 @@
 import React from 'react';
+import Icon from '../common/Icon.jsx';
 
 /**
  * ApprovalDialog Component
@@ -18,7 +19,7 @@ export function ApprovalDialog({
       <div className="modal-card modal-card-md">
         <div className="modal-header">
           <h3 id="approval-dialog-title" className="modal-title">
-            ✅ Duyệt yêu cầu mượn thiết bị
+            Duyệt yêu cầu mượn thiết bị
           </h3>
           <button
             type="button"
@@ -27,7 +28,7 @@ export function ApprovalDialog({
             disabled={isLoading}
             aria-label="Đóng"
           >
-            &times;
+            <Icon name="close" size={16} />
           </button>
         </div>
 
@@ -38,7 +39,9 @@ export function ApprovalDialog({
           </p>
 
           <div className="audit-card mb-3">
-            <div className="audit-card-title">📦 Danh sách thiết bị cần giữ kho (Reserved)</div>
+            <div className="audit-card-title">
+              <Icon name="box" size={14} /> Danh sách thiết bị cần giữ kho
+            </div>
             <ul style={{ paddingLeft: '20px', margin: 0 }}>
               {borrowing.items?.map((item) => (
                 <li key={item.id} style={{ fontSize: '0.9rem', marginBottom: '4px' }}>
@@ -48,8 +51,9 @@ export function ApprovalDialog({
             </ul>
           </div>
 
-          <div className="notice-banner" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe', color: '#1e40af' }}>
-            ℹ️ Sau khi duyệt, hệ thống sẽ tự động giữ kho (reserved stock) cho các thiết bị trên và tạo thời hạn nhận thiết bị là <strong>48 giờ</strong>.
+          <div className="notice-banner" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Icon name="info" size={16} color="#2563eb" />
+            <span>Sau khi duyệt, hệ thống sẽ tự động giữ kho cho các thiết bị trên và tạo thời hạn nhận thiết bị là <strong>48 giờ</strong>.</span>
           </div>
         </div>
 

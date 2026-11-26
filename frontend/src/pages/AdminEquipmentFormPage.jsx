@@ -3,10 +3,14 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import equipmentService from '../services/equipment.service.js';
 import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
+import Icon from '../components/common/Icon.jsx';
+import Breadcrumb from '../components/common/Breadcrumb.jsx';
+import { useToast } from '../contexts/ToastContext.jsx';
 
 export function AdminEquipmentFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const isEditMode = Boolean(id);
 
   const [formData, setFormData] = useState({
@@ -110,6 +114,7 @@ export function AdminEquipmentFormPage() {
           description: formData.description.trim() || null,
           total_quantity: Number(formData.total_quantity),
         });
+        toast.success(`Cập nhật thiết bị "${formData.name}" thành công!`);
       } else {
         // Create equipment
         await equipmentService.createEquipment({
@@ -119,6 +124,7 @@ export function AdminEquipmentFormPage() {
           description: formData.description.trim() || null,
           total_quantity: Number(formData.total_quantity),
         });
+        toast.success(`Thêm mới thiết bị "${formData.name}" thành công!`);
       }
 
       navigate('/admin/equipments');
@@ -136,6 +142,12 @@ export function AdminEquipmentFormPage() {
 
   return (
     <div className="admin-equipment-form-page" style={{ maxWidth: '720px', margin: '0 auto' }}>
+      <Breadcrumb
+        items={[
+          { label: 'Quản trị thiết bị', to: '/admin/equipments' },
+          { label: isEditMode ? `Sửa: ${existingEquipment?.name || id}` : 'Thêm thiết bị mới' },
+        ]}
+      />
       <div className="flex-between mb-4">
         <Link to="/admin/equipments" className="btn btn-outline-sm">
           &laquo; Quay lại danh sách thiết bị
@@ -145,7 +157,7 @@ export function AdminEquipmentFormPage() {
       <div className="card">
         <div className="card-header">
           <h2 className="card-title">
-            {isEditMode ? `✏️ Chỉnh sửa thiết bị: ${existingEquipment?.name}` : '➕ Thêm thiết bị mới'}
+            {isEditMode ? `Chỉnh sửa thiết bị: ${existingEquipment?.name}` : 'Thêm thiết bị mới'}
           </h2>
         </div>
 
@@ -156,14 +168,16 @@ export function AdminEquipmentFormPage() {
             {/* Invariant Info Banner for Edit Mode */}
             {isEditMode && existingEquipment && (
               <div className="audit-card mb-4">
-                <div className="audit-card-title">📊 Tồn kho hệ thống hiện tại (Quản lý tự động bởi Backend)</div>
+                <div className="audit-card-title">
+                  <Icon name="box" size={14} /> Tồn kho hệ thống hiện tại
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', marginTop: '6px' }}>
                   <div>Tổng hiện tại: <strong>{existingEquipment.total_quantity}</strong></div>
                   <div style={{ color: '#16a34a' }}>Khả dụng: <strong>{existingEquipment.available_quantity}</strong></div>
-                  <div style={{ color: '#d97706' }}>Đang giữ (Reserved): <strong>{existingEquipment.reserved_quantity || 0}</strong></div>
-                  <div style={{ color: '#7c3aed' }}>Đang mượn (Borrowed): <strong>{existingEquipment.borrowed_quantity || 0}</strong></div>
+                  <div style={{ color: '#d97706' }}>Đang giữ: <strong>{existingEquipment.reserved_quantity || 0}</strong></div>
+                  <div style={{ color: '#7c3aed' }}>Đang mượn: <strong>{existingEquipment.borrowed_quantity || 0}</strong></div>
                 </div>
-                <span className="field-hint" style={{ marginTop: '6px', display: 'block' }}>
+                <span className="form-hint" style={{ marginTop: '6px', display: 'block' }}>
                   * Các trường Khả dụng, Đang giữ và Đang mượn được tính toán và đồng bộ tự động theo các giao dịch mượn/trả.
                 </span>
               </div>
@@ -172,34 +186,34 @@ export function AdminEquipmentFormPage() {
             {/* Code */}
             <div className="form-group mb-3">
               <label htmlFor="eqCode" className="form-label" style={{ fontWeight: 600 }}>
-                Mã thiết bị (Code) <span className="text-danger">*</span>
+                Mã thiết bị <span className="required">*</span>
               </label>
               <input
                 id="eqCode"
                 name="code"
                 type="text"
-                className={`form-input ${fieldErrors.code ? 'border-danger' : ''}`}
+                className={`form-control ${fieldErrors.code ? 'border-danger' : ''}`}
                 placeholder="VD: EQP-LAP-003"
                 value={formData.code}
                 onChange={handleChange}
                 disabled={isEditMode || isSubmitting}
                 style={{ fontFamily: 'var(--font-mono)' }}
               />
-              {isEditMode && <span className="field-hint">Mã thiết bị là định danh duy nhất và không thể thay đổi sau khi tạo.</span>}
+              {isEditMode && <span className="form-hint">Mã thiết bị là định danh duy nhất và không thể thay đổi sau khi tạo.</span>}
               {fieldErrors.code && <span className="text-danger" style={{ fontSize: '0.8rem' }}>{fieldErrors.code}</span>}
             </div>
 
             {/* Name */}
             <div className="form-group mb-3">
               <label htmlFor="eqName" className="form-label" style={{ fontWeight: 600 }}>
-                Tên thiết bị <span className="text-danger">*</span>
+                Tên thiết bị <span className="required">*</span>
               </label>
               <input
                 id="eqName"
                 name="name"
                 type="text"
-                className={`form-input ${fieldErrors.name ? 'border-danger' : ''}`}
-                placeholder="VD: Laptop Dell Latitude 5540 (i7/32GB/1TB)"
+                className={`form-control ${fieldErrors.name ? 'border-danger' : ''}`}
+                placeholder="VD: Laptop Dell Latitude 5540"
                 value={formData.name}
                 onChange={handleChange}
                 disabled={isSubmitting}
@@ -210,13 +224,13 @@ export function AdminEquipmentFormPage() {
             {/* Category */}
             <div className="form-group mb-3">
               <label htmlFor="eqCategory" className="form-label" style={{ fontWeight: 600 }}>
-                Danh mục thiết bị (Category) <span className="text-danger">*</span>
+                Danh mục thiết bị <span className="required">*</span>
               </label>
               <input
                 id="eqCategory"
                 name="category"
                 type="text"
-                className={`form-input ${fieldErrors.category ? 'border-danger' : ''}`}
+                className={`form-control ${fieldErrors.category ? 'border-danger' : ''}`}
                 placeholder="VD: LAPTOP, PROJECTOR, MONITOR, LAB_TOOL, NETWORK"
                 value={formData.category}
                 onChange={handleChange}
@@ -228,14 +242,14 @@ export function AdminEquipmentFormPage() {
             {/* Total Quantity */}
             <div className="form-group mb-3">
               <label htmlFor="eqTotalQty" className="form-label" style={{ fontWeight: 600 }}>
-                Tổng số lượng sở hữu (Total Quantity) <span className="text-danger">*</span>
+                Tổng số lượng sở hữu <span className="required">*</span>
               </label>
               <input
                 id="eqTotalQty"
                 name="total_quantity"
                 type="number"
                 min={0}
-                className={`form-input ${fieldErrors.total_quantity ? 'border-danger' : ''}`}
+                className={`form-control ${fieldErrors.total_quantity ? 'border-danger' : ''}`}
                 value={formData.total_quantity}
                 onChange={handleChange}
                 disabled={isSubmitting}
@@ -254,7 +268,7 @@ export function AdminEquipmentFormPage() {
                 id="eqDescription"
                 name="description"
                 rows={4}
-                className="form-textarea"
+                className="form-control"
                 placeholder="Cấu hình, thông số kỹ thuật, phụ kiện đi kèm..."
                 value={formData.description}
                 onChange={handleChange}

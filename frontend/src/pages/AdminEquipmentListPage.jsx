@@ -7,10 +7,13 @@ import EquipmentStatusDialog from '../components/admin/EquipmentStatusDialog.jsx
 import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
 import EmptyState from '../components/common/EmptyState.jsx';
+import Icon from '../components/common/Icon.jsx';
+import { useToast } from '../contexts/ToastContext.jsx';
 import { EQUIPMENT_STATUS_LIST } from '../utils/constants.js';
 
 export function AdminEquipmentListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const toast = useToast();
 
   const initialPage = parseInt(searchParams.get('page') || '1', 10);
   const initialSearch = searchParams.get('search') || '';
@@ -19,6 +22,7 @@ export function AdminEquipmentListPage() {
   const initialActive = searchParams.get('is_active') || '';
 
   const [equipments, setEquipments] = useState([]);
+  const [sortBy, setSortBy] = useState('default');
   const [pagination, setPagination] = useState({
     page: initialPage,
     limit: 10,
@@ -120,7 +124,9 @@ export function AdminEquipmentListPage() {
       setActionSuccess('');
 
       await equipmentService.updateEquipmentStatus(selectedEquipment.id, { status, is_active });
-      setActionSuccess(`Cập nhật trạng thái thiết bị "${selectedEquipment.code}" thành công.`);
+      const msg = `Cập nhật trạng thái thiết bị "${selectedEquipment.code}" thành công.`;
+      setActionSuccess(msg);
+      toast.success(msg);
       setShowStatusModal(false);
       await fetchEquipments(pagination.page, searchInput.trim(), categoryFilter.trim(), statusFilter, activeFilter);
     } catch (err) {
@@ -130,25 +136,36 @@ export function AdminEquipmentListPage() {
     }
   };
 
+  const displayedEquipments = [...equipments].sort((a, b) => {
+    if (sortBy === 'name_asc') return a.name.localeCompare(b.name, 'vi');
+    if (sortBy === 'name_desc') return b.name.localeCompare(a.name, 'vi');
+    if (sortBy === 'code_asc') return a.code.localeCompare(b.code);
+    if (sortBy === 'qty_desc') return b.total_quantity - a.total_quantity;
+    return 0;
+  });
+
   return (
     <div className="admin-equipment-list-page">
       <div className="page-header-box">
         <div>
-          <h1 className="page-title">📦 Quản lý Thiết bị Phòng Lab</h1>
+          <h1 className="page-title">Quản lý Thiết bị Phòng Lab</h1>
           <p className="text-muted">
             Quản lý danh mục, tổng số lượng, trạng thái hoạt động và theo dõi tồn kho theo thời gian thực.
           </p>
         </div>
         <div className="dashboard-header-actions">
           <Link to="/admin/equipments/new" className="btn btn-primary btn-sm">
-            ➕ Thêm thiết bị mới
+            <Icon name="plus" size={14} /> Thêm thiết bị mới
           </Link>
         </div>
       </div>
 
       {actionSuccess && (
-        <div className="notice-banner mb-3" style={{ backgroundColor: '#f0fdf4', borderColor: '#86efac', color: '#166534' }}>
-          ✅ {actionSuccess}
+        <div className="success-banner" role="status">
+          <span className="success-icon">
+            <Icon name="check-circle" size={18} color="var(--color-success)" />
+          </span>
+          <p className="success-text">{actionSuccess}</p>
         </div>
       )}
       {errorMsg && <ErrorMessage message={errorMsg} />}
@@ -156,11 +173,14 @@ export function AdminEquipmentListPage() {
       {/* Filter and Search Bar */}
       <div className="filter-bar card p-3 mb-4">
         <form onSubmit={handleSearchSubmit} className="filter-form" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ flex: '1 1 200px' }}>
+          <div className="search-input-group" style={{ flex: '1 1 200px' }}>
+            <span className="search-icon">
+              <Icon name="search" size={16} />
+            </span>
             <input
               type="text"
-              className="form-input"
-              placeholder="🔍 Tìm theo mã hoặc tên..."
+              className="form-control search-input"
+              placeholder="Tìm theo mã hoặc tên..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
@@ -169,7 +189,7 @@ export function AdminEquipmentListPage() {
           <div style={{ flex: '1 1 150px' }}>
             <input
               type="text"
-              className="form-input"
+              className="form-control"
               placeholder="Danh mục (vd: LAPTOP)..."
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
@@ -178,7 +198,7 @@ export function AdminEquipmentListPage() {
 
           <div style={{ minWidth: '160px' }}>
             <select
-              className="form-select"
+              className="form-control select-control"
               value={statusFilter}
               onChange={(e) => {
                 const val = e.target.value;
@@ -197,7 +217,7 @@ export function AdminEquipmentListPage() {
 
           <div style={{ minWidth: '150px' }}>
             <select
-              className="form-select"
+              className="form-control select-control"
               value={activeFilter}
               onChange={(e) => {
                 const val = e.target.value;
@@ -206,13 +226,28 @@ export function AdminEquipmentListPage() {
               }}
             >
               <option value="">Tất cả hoạt động</option>
-              <option value="1">Đang hoạt động (1)</option>
-              <option value="0">Ngừng hoạt động (0)</option>
+              <option value="1">Đang hoạt động</option>
+              <option value="0">Ngừng hoạt động</option>
+            </select>
+          </div>
+
+          <div style={{ minWidth: '160px' }}>
+            <select
+              className="form-control select-control"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              title="Sắp xếp kết quả"
+            >
+              <option value="default">Sắp xếp: Mặc định</option>
+              <option value="name_asc">Tên (A &rarr; Z)</option>
+              <option value="name_desc">Tên (Z &rarr; A)</option>
+              <option value="code_asc">Mã (A &rarr; Z)</option>
+              <option value="qty_desc">Tổng số lượng (&darr;)</option>
             </select>
           </div>
 
           <button type="submit" className="btn btn-primary btn-sm">
-            Tìm kiếm
+            <Icon name="search" size={14} /> Tìm kiếm
           </button>
 
           {(searchInput || categoryFilter || statusFilter || activeFilter !== '') && (
@@ -232,11 +267,14 @@ export function AdminEquipmentListPage() {
         <Loading text="Đang tải danh sách thiết bị..." />
       ) : equipments.length === 0 ? (
         <EmptyState
-          icon="📦"
+          icon="box"
           title="Không tìm thấy thiết bị"
           description="Không có thiết bị nào khớp với điều kiện lọc hiện tại."
-          actionText="Thêm thiết bị mới"
-          onAction={() => window.location.assign('/admin/equipments/new')}
+          action={
+            <Link to="/admin/equipments/new" className="btn btn-primary">
+              <Icon name="plus" size={14} /> Thêm thiết bị mới
+            </Link>
+          }
         />
       ) : (
         <div className="card">
@@ -258,7 +296,7 @@ export function AdminEquipmentListPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {equipments.map((eq) => (
+                  {displayedEquipments.map((eq) => (
                     <tr key={eq.id}>
                       <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
                         {eq.code}
@@ -267,7 +305,7 @@ export function AdminEquipmentListPage() {
                         <strong>{eq.name}</strong>
                       </td>
                       <td>
-                        <span className="badge badge-light">{eq.category}</span>
+                        <span className="category-pill">{eq.category}</span>
                       </td>
                       <td style={{ textAlign: 'center', fontWeight: 700 }}>
                         {eq.total_quantity}
@@ -286,13 +324,9 @@ export function AdminEquipmentListPage() {
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         {Number(eq.is_active) === 1 ? (
-                          <span className="status-badge badge-status-available">
-                            <span className="status-badge-dot"></span> Active
-                          </span>
+                          <StatusBadge status="ACTIVE" />
                         ) : (
-                          <span className="status-badge badge-status-rejected">
-                            <span className="status-badge-dot"></span> Inactive
-                          </span>
+                          <StatusBadge status="INACTIVE" />
                         )}
                       </td>
                       <td style={{ textAlign: 'center' }}>
@@ -320,10 +354,9 @@ export function AdminEquipmentListPage() {
           </div>
           <div className="card-footer p-3">
             <Pagination
-              currentPage={pagination.page}
+              page={pagination.page}
               totalPages={pagination.totalPages}
-              totalItems={pagination.total}
-              limit={pagination.limit}
+              total={pagination.total}
               onPageChange={handlePageChange}
             />
           </div>

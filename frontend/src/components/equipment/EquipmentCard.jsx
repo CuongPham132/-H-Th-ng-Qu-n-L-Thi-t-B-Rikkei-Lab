@@ -23,7 +23,7 @@ export function EquipmentCard({ equipment }) {
           {equipment.name}
         </h4>
         <span className="equipment-category">
-          📂 {equipment.category}
+          {equipment.category}
         </span>
         <p className="equipment-desc">
           {equipment.description || 'Không có mô tả chi tiết.'}

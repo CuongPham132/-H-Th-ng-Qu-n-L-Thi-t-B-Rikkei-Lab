@@ -5,6 +5,9 @@ import borrowingService from '../services/borrowing.service.js';
 import StatusBadge from '../components/common/StatusBadge.jsx';
 import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
+import Icon from '../components/common/Icon.jsx';
+import Breadcrumb from '../components/common/Breadcrumb.jsx';
+import { useToast } from '../contexts/ToastContext.jsx';
 
 export function EquipmentDetailPage() {
   const { id } = useParams();
@@ -71,7 +74,6 @@ export function EquipmentDetailPage() {
       };
 
       const result = await borrowingService.createBorrowing(payload);
-      // Navigate to created borrowing detail
       navigate(`/borrower/borrowings/${result.id}`, {
         state: { message: `Tạo yêu cầu mượn thiết bị thành công! Mã phiếu: ${result.borrowing_code}` },
       });
@@ -101,6 +103,12 @@ export function EquipmentDetailPage() {
 
   return (
     <div className="equipment-detail-page">
+      <Breadcrumb
+        items={[
+          { label: 'Danh mục thiết bị', to: '/borrower/equipments' },
+          { label: equipment.code || equipment.name },
+        ]}
+      />
       <div className="detail-navigation">
         <Link to="/borrower/equipments" className="btn btn-outline-sm">
           &laquo; Quay lại danh mục thiết bị
@@ -120,7 +128,7 @@ export function EquipmentDetailPage() {
 
           <div className="card-body">
             <div className="detail-section">
-              <h4 className="section-title">📂 Danh mục & Thông số</h4>
+              <h4 className="section-title">Danh mục & Thông số</h4>
               <div className="info-grid">
                 <div className="info-box">
                   <span className="info-box-label">Danh mục:</span>
@@ -144,7 +152,7 @@ export function EquipmentDetailPage() {
             </div>
 
             <div className="detail-section mt-4">
-              <h4 className="section-title">📝 Mô tả chi tiết</h4>
+              <h4 className="section-title">Mô tả chi tiết</h4>
               <div className="description-box">
                 {equipment.description ? (
                   <p>{equipment.description}</p>
@@ -159,7 +167,7 @@ export function EquipmentDetailPage() {
         {/* Right Column: Quick Borrow Form */}
         <div className="card quick-borrow-card">
           <div className="card-header">
-            <h3 className="card-title">🚀 Đăng Ký Mượn Thiết Bị Này</h3>
+            <h3 className="card-title">Đăng ký mượn thiết bị</h3>
           </div>
 
           <div className="card-body">
@@ -276,7 +284,9 @@ export function EquipmentDetailPage() {
               </form>
             ) : (
               <div className="unavailable-notice">
-                <span className="notice-icon">⚠️</span>
+                <span className="notice-icon">
+                  <Icon name="alert" size={32} color="var(--color-warning)" />
+                </span>
                 <p className="notice-text">
                   Thiết bị hiện tại không đủ số lượng khả dụng để mượn hoặc đang ở trạng thái bảo trì.
                 </p>

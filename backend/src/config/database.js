@@ -15,6 +15,7 @@ const pool = mysql.createPool({
   keepAliveInitialDelay: 10000,
   dateStrings: true, // Return dates as strings to avoid UTC-offset timezone shifts
   timezone: '+07:00', // Vietnam Standard Time
+  charset: 'utf8mb4',
 });
 
 /**

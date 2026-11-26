@@ -9,12 +9,16 @@ import ConfirmDialog from '../components/common/ConfirmDialog.jsx';
 import Loading from '../components/common/Loading.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
 import EmptyState from '../components/common/EmptyState.jsx';
+import Icon from '../components/common/Icon.jsx';
+import { useToast } from '../contexts/ToastContext.jsx';
 import { ROLE_LIST } from '../utils/constants.js';
 
 export function AdminUserListPage() {
   const { user: currentUser } = useAuth();
+  const toast = useToast();
 
   const [users, setUsers] = useState([]);
+  const [sortBy, setSortBy] = useState('default');
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -89,7 +93,9 @@ export function AdminUserListPage() {
       setActionSuccess('');
 
       const created = await userService.createUser(userData);
-      setActionSuccess(`Tạo tài khoản "${created.email}" thành công với vai trò ${created.role}.`);
+      const msg = `Tạo tài khoản "${created.email}" thành công với vai trò ${created.role}.`;
+      setActionSuccess(msg);
+      toast.success(msg);
       setShowCreateModal(false);
       await fetchUsers(pagination.page, searchInput, roleFilter, activeFilter);
     } catch (err) {
@@ -113,7 +119,9 @@ export function AdminUserListPage() {
       setActionSuccess('');
 
       await userService.updateUserRole(selectedUser.id, newRole);
-      setActionSuccess(`Cập nhật vai trò tài khoản "${selectedUser.email}" thành ${newRole} thành công.`);
+      const msg = `Cập nhật vai trò tài khoản "${selectedUser.email}" thành công.`;
+      setActionSuccess(msg);
+      toast.success(msg);
       setShowRoleModal(false);
       await fetchUsers(pagination.page, searchInput, roleFilter, activeFilter);
     } catch (err) {
@@ -138,11 +146,11 @@ export function AdminUserListPage() {
       setActionSuccess('');
 
       await userService.updateUserStatus(selectedUser.id, nextStatus);
-      setActionSuccess(
-        nextStatus === 1
-          ? `Kích hoạt tài khoản "${selectedUser.email}" thành công.`
-          : `Vô hiệu hóa tài khoản "${selectedUser.email}" thành công.`
-      );
+      const msg = nextStatus === 1
+        ? `Kích hoạt tài khoản "${selectedUser.email}" thành công.`
+        : `Vô hiệu hóa tài khoản "${selectedUser.email}" thành công.`;
+      setActionSuccess(msg);
+      toast.success(msg);
       setShowStatusModal(false);
       await fetchUsers(pagination.page, searchInput, roleFilter, activeFilter);
     } catch (err) {
@@ -164,13 +172,20 @@ export function AdminUserListPage() {
     });
   };
 
+  const displayedUsers = [...users].sort((a, b) => {
+    if (sortBy === 'name_asc') return (a.full_name || '').localeCompare(b.full_name || '', 'vi');
+    if (sortBy === 'name_desc') return (b.full_name || '').localeCompare(a.full_name || '', 'vi');
+    if (sortBy === 'email_asc') return (a.email || '').localeCompare(b.email || '');
+    return 0;
+  });
+
   return (
     <div className="admin-user-list-page">
       <div className="page-header-box">
         <div>
-          <h1 className="page-title">👥 Quản lý Người dùng Hệ thống</h1>
+          <h1 className="page-title">Quản lý Người dùng Hệ thống</h1>
           <p className="text-muted">
-            Phân quyền tài khoản (ADMIN, STAFF, BORROWER), tạo tài khoản và kiểm soát kích hoạt/vô hiệu hóa.
+            Phân quyền tài khoản (Quản trị viên, Nhân viên Lab, Người mượn), tạo tài khoản và kiểm soát kích hoạt/vô hiệu hóa.
           </p>
         </div>
         <div className="dashboard-header-actions">
@@ -179,14 +194,17 @@ export function AdminUserListPage() {
             className="btn btn-primary btn-sm"
             onClick={() => setShowCreateModal(true)}
           >
-            ➕ Tạo tài khoản mới
+            <Icon name="plus" size={14} /> Tạo tài khoản mới
           </button>
         </div>
       </div>
 
       {actionSuccess && (
-        <div className="notice-banner mb-3" style={{ backgroundColor: '#f0fdf4', borderColor: '#86efac', color: '#166534' }}>
-          ✅ {actionSuccess}
+        <div className="success-banner" role="status">
+          <span className="success-icon">
+            <Icon name="check-circle" size={18} color="var(--color-success)" />
+          </span>
+          <p className="success-text">{actionSuccess}</p>
         </div>
       )}
       {errorMsg && <ErrorMessage message={errorMsg} />}
@@ -194,11 +212,14 @@ export function AdminUserListPage() {
       {/* Filter and Search Bar */}
       <div className="filter-bar card p-3 mb-4">
         <form onSubmit={handleSearchSubmit} className="filter-form" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ flex: '1 1 220px' }}>
+          <div className="search-input-group" style={{ flex: '1 1 220px' }}>
+            <span className="search-icon">
+              <Icon name="search" size={16} />
+            </span>
             <input
               type="text"
-              className="form-input"
-              placeholder="🔍 Tìm theo tên, email, SĐT..."
+              className="form-control search-input"
+              placeholder="Tìm theo tên, email, SĐT..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
@@ -206,7 +227,7 @@ export function AdminUserListPage() {
 
           <div style={{ minWidth: '160px' }}>
             <select
-              className="form-select"
+              className="form-control select-control"
               value={roleFilter}
               onChange={(e) => {
                 const val = e.target.value;
@@ -225,7 +246,7 @@ export function AdminUserListPage() {
 
           <div style={{ minWidth: '150px' }}>
             <select
-              className="form-select"
+              className="form-control select-control"
               value={activeFilter}
               onChange={(e) => {
                 const val = e.target.value;
@@ -234,13 +255,27 @@ export function AdminUserListPage() {
               }}
             >
               <option value="">Tất cả trạng thái</option>
-              <option value="1">Đang hoạt động (1)</option>
-              <option value="0">Đã vô hiệu hóa (0)</option>
+              <option value="1">Đang hoạt động</option>
+              <option value="0">Đã vô hiệu hóa</option>
+            </select>
+          </div>
+
+          <div style={{ minWidth: '160px' }}>
+            <select
+              className="form-control select-control"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              title="Sắp xếp kết quả"
+            >
+              <option value="default">Sắp xếp: Mặc định</option>
+              <option value="name_asc">Họ tên (A &rarr; Z)</option>
+              <option value="name_desc">Họ tên (Z &rarr; A)</option>
+              <option value="email_asc">Email (A &rarr; Z)</option>
             </select>
           </div>
 
           <button type="submit" className="btn btn-primary btn-sm">
-            Tìm kiếm
+            <Icon name="search" size={14} /> Tìm kiếm
           </button>
 
           {(searchInput || roleFilter || activeFilter !== '') && (
@@ -260,11 +295,18 @@ export function AdminUserListPage() {
         <Loading text="Đang tải danh sách người dùng..." />
       ) : users.length === 0 ? (
         <EmptyState
-          icon="👥"
+          icon="users"
           title="Không tìm thấy người dùng"
           description="Không có tài khoản người dùng nào khớp với bộ lọc."
-          actionText="Tạo tài khoản mới"
-          onAction={() => setShowCreateModal(true)}
+          action={
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <Icon name="plus" size={14} /> Tạo tài khoản mới
+            </button>
+          }
         />
       ) : (
         <div className="card">
@@ -284,19 +326,26 @@ export function AdminUserListPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => {
+                  {displayedUsers.map((u) => {
                     const isSelf = u.id === currentUser?.id;
                     const isActive = Number(u.is_active) === 1;
 
-                    return (
-                      <tr key={u.id} style={{ background: isSelf ? '#f0fdf4' : 'inherit' }}>
+                    const displayedUsers = [...users].sort((a, b) => {
+    if (sortBy === 'name_asc') return (a.full_name || '').localeCompare(b.full_name || '', 'vi');
+    if (sortBy === 'name_desc') return (b.full_name || '').localeCompare(a.full_name || '', 'vi');
+    if (sortBy === 'email_asc') return (a.email || '').localeCompare(b.email || '');
+    return 0;
+  });
+
+  return (
+                      <tr key={u.id} style={{ background: isSelf ? '#f8fafc' : 'inherit' }}>
                         <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
                           #{u.id}
                         </td>
                         <td>
                           <strong>{u.full_name}</strong>
                           {isSelf && (
-                            <span className="badge badge-primary" style={{ marginLeft: '6px', fontSize: '0.7rem' }}>
+                            <span className="badge badge-admin" style={{ marginLeft: '6px', fontSize: '0.7rem' }}>
                               Bạn
                             </span>
                           )}
@@ -307,15 +356,7 @@ export function AdminUserListPage() {
                           <StatusBadge status={u.role} />
                         </td>
                         <td style={{ textAlign: 'center' }}>
-                          {isActive ? (
-                            <span className="status-badge badge-status-available">
-                              <span className="status-badge-dot"></span> Hoạt động
-                            </span>
-                          ) : (
-                            <span className="status-badge badge-status-rejected">
-                              <span className="status-badge-dot"></span> Vô hiệu hóa
-                            </span>
-                          )}
+                          <StatusBadge status={isActive ? 'ACTIVE' : 'INACTIVE'} />
                         </td>
                         <td style={{ fontSize: '0.85rem' }}>{formatDate(u.created_at)}</td>
                         <td style={{ textAlign: 'center' }}>
@@ -349,10 +390,9 @@ export function AdminUserListPage() {
           </div>
           <div className="card-footer p-3">
             <Pagination
-              currentPage={pagination.page}
+              page={pagination.page}
               totalPages={pagination.totalPages}
-              totalItems={pagination.total}
-              limit={pagination.limit}
+              total={pagination.total}
               onPageChange={handlePageChange}
             />
           </div>

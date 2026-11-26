@@ -13,7 +13,7 @@ import UnauthorizedPage from '../pages/auth/UnauthorizedPage.jsx';
 import HomePage from '../pages/HomePage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 
-// Borrower Pages (FE3)
+// Borrower Pages
 import BorrowerDashboardPage from '../pages/BorrowerDashboardPage.jsx';
 import EquipmentListPage from '../pages/EquipmentListPage.jsx';
 import EquipmentDetailPage from '../pages/EquipmentDetailPage.jsx';
@@ -21,12 +21,12 @@ import CreateBorrowingPage from '../pages/CreateBorrowingPage.jsx';
 import BorrowingListPage from '../pages/BorrowingListPage.jsx';
 import BorrowingDetailPage from '../pages/BorrowingDetailPage.jsx';
 
-// Staff Pages (FE4)
+// Staff Pages
 import StaffDashboardPage from '../pages/StaffDashboardPage.jsx';
 import StaffBorrowingListPage from '../pages/StaffBorrowingListPage.jsx';
 import StaffBorrowingDetailPage from '../pages/StaffBorrowingDetailPage.jsx';
 
-// Admin Pages (FE5)
+// Admin Pages
 import AdminDashboardPage from '../pages/AdminDashboardPage.jsx';
 import AdminEquipmentListPage from '../pages/AdminEquipmentListPage.jsx';
 import AdminEquipmentFormPage from '../pages/AdminEquipmentFormPage.jsx';
@@ -51,10 +51,10 @@ export function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        {/* Home Overview: accessible by all authenticated roles (BORROWER, STAFF, ADMIN) */}
+        {/* Home Overview: accessible by all authenticated roles */}
         <Route path="/" element={<HomePage />} />
 
-        {/* Borrower Module Routes (RoleRoute: BORROWER) */}
+        {/* Borrower Module Routes */}
         <Route
           path="/borrower"
           element={
@@ -104,7 +104,7 @@ export function AppRoutes() {
           }
         />
 
-        {/* Staff Module Routes (FE4 - STAFF & ADMIN) */}
+        {/* Staff Module Routes */}
         <Route
           path="/staff"
           element={
@@ -130,7 +130,7 @@ export function AppRoutes() {
           }
         />
 
-        {/* Admin Module Routes (FE5 - ADMIN only) */}
+        {/* Admin Module Routes */}
         <Route
           path="/admin"
           element={
